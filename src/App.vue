@@ -2,7 +2,7 @@
   <v-app :theme="theme">
     <v-app-bar app color="primary" dark>
       <div class="d-flex align-center">
-        <h1>Access Log Viewer</h1>
+        <h1>Security Access Log Viewer</h1>
       </div>
 
       <v-spacer></v-spacer>
@@ -243,11 +243,11 @@
           <v-col cols="12" lg="6">
             <v-card height="100%">
               <v-tabs
-                id="tabs"
                 v-model="tab"
-                center-active
+                background-color="transparent"
+                id="tabs"
               >
-                <v-tabs-slider color="blue"></v-tabs-slider>
+                <v-tabs-slider color="accent"></v-tabs-slider>
                 <v-tab class="text-capitalize">
                   <div>Sessions</div>
                   <div class="text-h6">{{ numberOfSessions }}</div>
