@@ -20,6 +20,10 @@ Easily check IP addresses:
 
 ![access log viewer apache and nginx](public/ss05.png)
 
+Browse agents:
+
+![access log viewer apache and nginx](public/ss06.png)
+
 ## Table of Contents
 
 - [Security Access Log Viewer](#security-access-log-viewer)
