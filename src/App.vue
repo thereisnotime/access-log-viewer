@@ -479,7 +479,9 @@
                     </thead>
                     <tbody>
                       <tr v-for="(item, i) in mostIPs" :key="i">
-                        <td class="text-left">{{ item.ip || '-' }}</td>
+                        <td class="text-left">
+                          <ip-address :ip="item.ip || '-'" />
+                        </td>
                         <td class="text-left">
                           <img
                             v-if="item.country && item.country.length === 2"
@@ -736,6 +738,9 @@
                   }"
                   @click:row="showLogDetails"
                 >
+                  <template v-slot:item.ipAddress="{ item }">
+                    <ip-address :ip="item.ipAddress" />
+                  </template>
                   <template v-slot:item.transfer="{ item }">
                     {{ prettyBytes(item.transfer) }}
                   </template>
@@ -811,6 +816,7 @@
                     <span v-else-if="key === 'transfer'">{{ prettyBytes(value) }}</span>
                     <span v-else-if="key === 'url'" class="text-break">{{ value }}</span>
                     <span v-else-if="key === 'statusCode'" :class="getStatusCodeClass(value)">{{ value }}</span>
+                    <ip-address v-else-if="key === 'ipAddress'" :ip="value"></ip-address>
                     <span v-else-if="key === 'country' && value && value.length === 2">
                       <img 
                         width="16" 
@@ -980,6 +986,7 @@ import IconTrash from "./components/icons/IconTrash.vue";
 import IconDesktop from "./components/icons/IconDesktop.vue";
 import IconMobile from "./components/icons/IconMobile.vue";
 import IconTablet from "./components/icons/IconTablet.vue";
+import IpAddress from "./components/IpAddress.vue";
 import { GChart } from "vue-google-charts";
 const prettyBytes = require("pretty-bytes");
 
@@ -989,6 +996,7 @@ export default {
     IconDesktop,
     IconMobile,
     IconTablet,
+    IpAddress,
     GChart,
   },
   created() {

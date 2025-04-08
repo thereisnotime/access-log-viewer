@@ -1,8 +1,6 @@
 # Access Log Viewer
 
-View Nginx and Apache access.log files in your Browser. Fork that adds security features.
-
-<https://rolandstarke.github.io/access-log-viewer/>
+A fork of the access-log-viewer with features on top of the original to help security investigations.
 
 ![access log viewer apache and nginx](public/ss01.png)
 ![access log viewer apache and nginx](public/ss02.png)
