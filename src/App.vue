@@ -205,28 +205,111 @@
             </v-card>
           </v-col>
 
-          <v-col cols="12" lg="3">
+          <v-col cols="12" lg="6">
             <v-card height="100%">
-              <v-card-title> Sessions by Country </v-card-title>
+              <v-card-title>Countries</v-card-title>
               <v-card-text>
                 <GChart
-                  class="google-geo-chart"
-                  :settings="{ packages: ['geochart'] }"
                   type="GeoChart"
+                  class="google-geo-chart"
                   :data="chartDataMap"
                   :options="{
-                    legend: 'none',
-                    datalessRegionColor: $vuetify.theme.dark ? '#333' : '#f5f5f5',
-                    colorAxis: { colors: $vuetify.theme.dark ? ['#365680', '#09ade8'] : ['#93d5ed', '#1a73e8'] },
-                    backgroundColor: 'transparent',
+                    colorAxis: { colors: $vuetify.theme.dark ? ['#214478', '#3d78db'] : ['#a5bbf3', '#0d47a1'] },
+                    backgroundColor: 'transparent'
                   }"
                 />
               </v-card-text>
             </v-card>
           </v-col>
+        </v-row>
 
+        <v-row>
+          <v-col cols="12" lg="6">
+            <v-card height="100%">
+              <v-card-title>Top IP Addresses</v-card-title>
+              <v-card-text>
+                <v-simple-table>
+                  <template v-slot:default>
+                    <thead>
+                      <tr>
+                        <th class="text-left">IP Address</th>
+                        <th class="text-left">Country</th>
+                        <th class="text-left">Browser</th>
+                        <th class="text-right">Requests</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(item, i) in mostIPs" :key="i">
+                        <td>{{ item.ip }}</td>
+                        <td>
+                          <img
+                            v-if="item.country"
+                            width="16" 
+                            height="16"
+                            :src="`https://flagcdn.com/16x12/${item.country.toLowerCase()}.png`"
+                            :alt="item.country"
+                            class="mr-1"
+                          />
+                          {{ item.country }}
+                        </td>
+                        <td>
+                          <img
+                            v-if="browserLogos[item.browser]"
+                            :src="browserLogos[item.browser]"
+                            :alt="item.browser"
+                            width="16"
+                            height="16"
+                            class="mr-1"
+                          />
+                          {{ item.browser }}
+                        </td>
+                        <td class="text-right">{{ item.hits }}</td>
+                      </tr>
+                    </tbody>
+                  </template>
+                </v-simple-table>
+              </v-card-text>
+            </v-card>
+          </v-col>
+
+          <v-col cols="12" lg="6">
+            <v-card height="100%">
+              <v-card-title>Browsers</v-card-title>
+              <v-card-text>
+                <v-simple-table>
+                  <template v-slot:default>
+                    <thead>
+                      <tr>
+                        <th class="text-left">Browser</th>
+                        <th class="text-right">Sessions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(item, i) in mostBrowsers" :key="i">
+                        <td>
+                          <img
+                            v-if="browserLogos[item.browser]"
+                            :src="browserLogos[item.browser]"
+                            :alt="item.browser"
+                            width="16"
+                            height="16"
+                            class="mr-1"
+                          />
+                          {{ item.browser }}
+                        </td>
+                        <td class="text-right">{{ item.hits }}</td>
+                      </tr>
+                    </tbody>
+                  </template>
+                </v-simple-table>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+
+        <v-row>
           <v-col cols="12" lg="3">
-            <v-card height="100%" style="display: flex; flex-direction: column">
+            <v-card height="100%">
               <v-card-title> Sessions by Device </v-card-title>
               <v-card-text
                 style="
@@ -278,9 +361,7 @@
               </v-card-text>
             </v-card>
           </v-col>
-        </v-row>
 
-        <v-row>
           <v-col cols="12" lg="4">
             <v-card height="100%">
               <v-card-title>
@@ -382,47 +463,6 @@
                             />
                           </span>
                           {{ item.referrer }}
-                        </td>
-                        <td>{{ item.hits }}</td>
-                      </tr>
-                    </tbody>
-                  </template>
-                </v-simple-table>
-              </v-card-text>
-            </v-card>
-          </v-col>
-
-          <v-col cols="12" lg="3">
-            <v-card height="100%">
-              <v-card-title> Sessions by Browser </v-card-title>
-              <v-card-text>
-                <v-simple-table dense>
-                  <template v-slot:default>
-                    <thead>
-                      <tr>
-                        <th class="text-left">Browser</th>
-                        <th class="text-left">Hits</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="item in mostBrowsers" :key="item.url">
-                        <td>
-                          <span
-                            style="
-                              display: inline-block;
-                              height: 16px;
-                              width: 16px;
-                              vertical-align: text-bottom;
-                            "
-                          >
-                            <img
-                              v-if="browserLogos[item.browser]"
-                              :src="browserLogos[item.browser]"
-                              height="16"
-                              width="16"
-                            />
-                          </span>
-                          {{ item.browser }}
                         </td>
                         <td>{{ item.hits }}</td>
                       </tr>
@@ -594,6 +634,9 @@ export default {
       tablet: { percentage: 0 },
       mobile: { percentage: 0 },
     },
+    mostIPs: [
+      { ip: "192.168.1.1", hits: 0, country: "US", browser: "Chrome" },
+    ],
     mostStatusCodes: [
       { statusCode: 200, hits: 0 },
       { statusCode: 404, hits: 0 },
@@ -759,6 +802,8 @@ export default {
       const requestCounter = {};
       const transfereCounter = {};
       const countryCounter = {};
+      const ipCounter = {};
+      const ipData = {};
       const dates = {};
       let transfere = 0;
 
@@ -778,6 +823,20 @@ export default {
           statusCodesCounter[log.statusCode] + 1 || 1;
         if (log.url) {
           urlCounter[log.url] = urlCounter[log.url] + 1 || 1;
+        }
+        
+        // Track IP addresses and their request counts
+        if (log.ipAddress) {
+          ipCounter[log.ipAddress] = ipCounter[log.ipAddress] + 1 || 1;
+          
+          // Store the associated country and browser info for each IP
+          if (!ipData[log.ipAddress]) {
+            ipData[log.ipAddress] = {
+              country: log.country || '',
+              browser: '',
+              userAgent: log.userAgend || ''
+            };
+          }
         }
 
         let time;
@@ -814,10 +873,21 @@ export default {
         }
         if (log.browser) {
           browserCounter[log.browser] = browserCounter[log.browser] + 1 || 1;
+          
+          // Update browser info for this IP if available
+          if (log.ipAddress && ipData[log.ipAddress]) {
+            ipData[log.ipAddress].browser = log.browser;
+          }
         }
         if (log.country) {
           countryCounter[log.country] = countryCounter[log.country] + 1 || 1;
+          
+          // Update country info for this IP if available
+          if (log.ipAddress && ipData[log.ipAddress]) {
+            ipData[log.ipAddress].country = log.country;
+          }
         }
+        
         let time;
         if (splitTime === "hour") {
           time =
@@ -957,6 +1027,19 @@ export default {
         this.devices.mobile.percentage = 0;
         this.devices.tablet.percentage = 0;
       }
+
+      const mostIPs = [];
+      for (let ip in ipCounter) {
+        mostIPs.push({
+          ip: ip,
+          hits: ipCounter[ip],
+          country: ipData[ip] ? ipData[ip].country : '',
+          browser: ipData[ip] ? ipData[ip].browser : '',
+          userAgent: ipData[ip] ? ipData[ip].userAgent : ''
+        });
+      }
+      mostIPs.sort((a, b) => b.hits - a.hits);
+      this.mostIPs = mostIPs.slice(0, 10);
     },
   },
 };
