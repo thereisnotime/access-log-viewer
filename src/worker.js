@@ -97,7 +97,8 @@ onmessage = async function (e) {
         }
 
         line.forEach((column, i) => {
-            if (column.match(/^\d+\.\d+\.\d+\.\d+/)) { // 188.103.4.49
+            // Always use first column for IP address
+            if (i === 0) {
                 detectedColumns.ipAddress[i] = detectedColumns.ipAddress[i] + 1 || 1;
             }
 
@@ -143,8 +144,9 @@ onmessage = async function (e) {
 
         const logLine = {};
 
-        if (line[detectedColumns.ipAddress]) {
-            logLine.ipAddress = line[detectedColumns.ipAddress].split(',')[0];
+        // Always use the first column for IP address
+        if (line[0]) {
+            logLine.ipAddress = line[0].split(',')[0];
         }
 
         if (line[detectedColumns.statusCode]) {

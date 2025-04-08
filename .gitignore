@@ -1,6 +1,9 @@
+# IDes
+.vscode
+.idea
+
 .DS_Store
 node_modules
-
 
 # local env files
 .env.local
