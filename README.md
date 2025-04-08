@@ -1,15 +1,53 @@
-# Access Log Viewer
+# Security Access Log Viewer
 
 A fork of the access-log-viewer with features on top of the original to help security investigations.
 
 ![access log viewer apache and nginx](public/ss01.png)
+
+Zoom in and out in the timeline:
+
 ![access log viewer apache and nginx](public/ss02.png)
+
+Check detailed information about the logs and their raw data:
+
 ![access log viewer apache and nginx](public/ss03.png)
+
+Explore timeframes:
+
 ![access log viewer apache and nginx](public/ss04.png)
+
+Easily check IP addresses:
+
+![access log viewer apache and nginx](public/ss05.png)
+
+## Table of Contents
+
+- [Security Access Log Viewer](#security-access-log-viewer)
+  - [Table of Contents](#table-of-contents)
+  - [Roadmap](#roadmap)
+  - [Features](#features)
+    - [Visitors](#visitors)
+    - [Geographical Data](#geographical-data)
+    - [Device Data](#device-data)
+    - [Referral-Traffic](#referral-traffic)
+    - [Most Requested Files](#most-requested-files)
+    - [Status Codes](#status-codes)
+  - [Docker Usage](#docker-usage)
+    - [Build the Docker image](#build-the-docker-image)
+    - [Run the Docker container](#run-the-docker-container)
+    - [Development with Docker](#development-with-docker)
+      - [Using Docker Compose for Development](#using-docker-compose-for-development)
+    - [Quick Start Commands](#quick-start-commands)
+      - [Using the dev.sh Script](#using-the-devsh-script)
+    - [Note](#note)
 
 ## Roadmap
 
 - [ ] Add exception list (ex. health checks and liveness probes).
+- [ ] Add string filter/search in the Logs panel.
+- [ ] Make the sort on tables work on all data not only the current page.
+- [ ] Improve loading speed.
+- [ ] Add additional file import for IP data (ex. ASN, Country, City, etc. for more details).
 
 ## Features
 
