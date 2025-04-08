@@ -143,6 +143,9 @@ onmessage = async function (e) {
         }
 
         const logLine = {};
+        
+        // Store raw log line
+        logLine.raw = line.join(' ').trim();
 
         // Always use the first column for IP address
         if (line[0]) {

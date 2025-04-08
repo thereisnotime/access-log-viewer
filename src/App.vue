@@ -724,6 +724,7 @@
                   :footer-props="{
                     'items-per-page-options': [10, 20, 30],
                   }"
+                  @click:row="showLogDetails"
                 >
                   <template v-slot:item.transfer="{ item }">
                     {{ prettyBytes(item.transfer) }}
@@ -776,6 +777,67 @@
         </v-card-text>
       </v-card>
     </v-footer>
+
+    <!-- Log Details Dialog -->
+    <v-dialog v-model="logDetailsDialog" max-width="800">
+      <v-card>
+        <v-card-title class="headline">
+          Log Details
+          <v-spacer></v-spacer>
+          <v-btn icon @click="logDetailsDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text>
+          <v-simple-table dense>
+            <template v-slot:default>
+              <tbody>
+                <tr v-for="(value, key) in filteredLogDetails" :key="key">
+                  <th class="text-no-wrap" style="min-width: 120px">
+                    {{ formatFieldName(key) }}
+                  </th>
+                  <td>
+                    <span v-if="key === 'date'">{{ formatDateTime(value) }}</span>
+                    <span v-else-if="key === 'transfer'">{{ prettyBytes(value) }}</span>
+                    <span v-else-if="key === 'url'" class="text-break">{{ value }}</span>
+                    <span v-else-if="key === 'statusCode'" :class="getStatusCodeClass(value)">{{ value }}</span>
+                    <span v-else-if="key === 'country' && value && value.length === 2">
+                      <img 
+                        width="16" 
+                        height="12"
+                        :src="`https://flagcdn.com/16x12/${value.toLowerCase()}.png`"
+                        :alt="value"
+                        class="mr-1"
+                      />
+                      {{ value }}
+                    </span>
+                    <span v-else-if="key === 'browser' && browserLogos[value]">
+                      <img
+                        :src="browserLogos[value]"
+                        :alt="value"
+                        width="16"
+                        height="16"
+                        class="mr-1"
+                      />
+                      {{ value }}
+                    </span>
+                    <span v-else>{{ value }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </template>
+          </v-simple-table>
+          
+          <div class="mt-4" v-if="selectedLogDetails && selectedLogDetails.raw">
+            <v-divider class="mb-3"></v-divider>
+            <div class="subtitle-1 mb-2">Raw Log Entry:</div>
+            <v-card outlined class="pa-2 grey lighten-4 black--text" :class="{'grey darken-3 white--text': $vuetify.theme.dark}">
+              <pre style="white-space: pre-wrap; word-break: break-all;">{{ selectedLogDetails.raw }}</pre>
+            </v-card>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
@@ -814,12 +876,46 @@
   fill: #111;
   stroke: #000;
 }
-.theme--dark .google-visualization-tooltip path {        
-  fill: #111;
-  stroke: #000;
-}
 .theme--dark .google-visualization-tooltip text {        
   fill: #eee;
+}
+
+/* Make log table rows look clickable */
+.v-data-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.v-data-table tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.theme--dark .v-data-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Status code colors */
+.success {
+  color: #4caf50;
+  font-weight: 500;
+}
+
+.warning {
+  color: #fb8c00;
+  font-weight: 500;
+}
+
+.error {
+  color: #f44336;
+  font-weight: 500;
+}
+
+/* Make raw log entry more readable */
+pre {
+  margin: 0;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 13px;
+  line-height: 1.5;
 }
 </style>
 <script>
@@ -929,7 +1025,24 @@ export default {
     endDatePicker: null,
     endTimePicker: null,
     isFiltered: false,
+    logDetailsDialog: false,
+    selectedLogDetails: null,
   }),
+  computed: {
+    filteredLogDetails() {
+      if (!this.selectedLogDetails) return {};
+      
+      // Create a filtered copy without the 'raw' property
+      const filtered = {};
+      Object.keys(this.selectedLogDetails).forEach(key => {
+        if (key !== 'raw') {
+          filtered[key] = this.selectedLogDetails[key];
+        }
+      });
+      
+      return filtered;
+    }
+  },
   methods: {
     prettyBytes: prettyBytes,
     getNetworkInfo: function(ip) {
@@ -1635,6 +1748,69 @@ export default {
         this.calculateValues(filteredLogs, filteredSessions);
         this.isFiltered = true;
       }
+    },
+    showLogDetails: function(item) {
+      // Create a copy of the item to avoid modifying the original
+      const detailsObj = {...item};
+      
+      // Order the properties for better readability
+      const orderedDetails = {};
+      
+      // Primary properties to show first (in this order)
+      const primaryProps = ['date', 'ipAddress', 'method', 'url', 'statusCode', 'transfer', 'country', 'browser', 'device'];
+      
+      // Add primary properties first
+      primaryProps.forEach(prop => {
+        if (detailsObj[prop] !== undefined) {
+          orderedDetails[prop] = detailsObj[prop];
+        }
+      });
+      
+      // Add remaining properties except 'raw'
+      Object.keys(detailsObj).forEach(key => {
+        if (!primaryProps.includes(key) && key !== 'raw') {
+          orderedDetails[key] = detailsObj[key];
+        }
+      });
+      
+      // Add raw data at the end if available
+      if (detailsObj.raw) {
+        orderedDetails.raw = detailsObj.raw;
+      }
+      
+      this.selectedLogDetails = orderedDetails;
+      this.logDetailsDialog = true;
+    },
+    formatFieldName: function(key) {
+      // Format field names for better readability
+      const fieldNameMap = {
+        'ipAddress': 'IP Address',
+        'statusCode': 'Status Code',
+        'referrerDomain': 'Referrer Domain',
+        'userAgent': 'User Agent',
+        'transfere': 'Transfer'
+      };
+      
+      // Return mapped name if available
+      if (fieldNameMap[key]) {
+        return fieldNameMap[key];
+      }
+      
+      // Otherwise capitalize first letter
+      return key.charAt(0).toUpperCase() + key.slice(1);
+    },
+    getStatusCodeClass: function(statusCode) {
+      // Implement your logic to determine the class based on the status code
+      if (statusCode >= 200 && statusCode < 300) {
+        return 'success';
+      } else if (statusCode >= 300 && statusCode < 400) {
+        return 'warning';
+      } else if (statusCode >= 400 && statusCode < 500) {
+        return 'error';
+      } else if (statusCode >= 500) {
+        return 'error';
+      }
+      return '';
     },
   },
 };
