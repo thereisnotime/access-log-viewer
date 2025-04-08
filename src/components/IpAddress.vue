@@ -62,9 +62,13 @@ export default {
   cursor: pointer;
   position: relative;
   border-bottom: 1px dotted rgba(128, 128, 128, 0.4);
+  transition: color 0.2s, background-color 0.2s;
+  padding: 2px 4px;
+  border-radius: 3px;
 }
 .ip-wrapper:hover {
   text-decoration: underline;
   color: var(--v-secondary-base);
+  background-color: rgba(139, 0, 0, 0.1);
 }
 </style> 

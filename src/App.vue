@@ -267,6 +267,10 @@
                     <v-icon left>mdi-browser</v-icon>
                     <div>Most Used Browsers</div>
                   </v-tab>
+                  <v-tab>
+                    <v-icon left>mdi-file-download</v-icon>
+                    <div>Largest Transfers</div>
+                  </v-tab>
                   <v-tabs-slider color="primary"></v-tabs-slider>
                 </v-tabs>
                 <v-tabs-items v-model="securityTab">
@@ -286,7 +290,8 @@
                           dense
                           :items-per-page="10"
                           :footer-props="{
-                            'items-per-page-options': [10, 20, 30, 50, 100]
+                            'items-per-page-options': [10, 20, 30, 50, 100],
+                            'show-first-last-page': true
                           }"
                           class="elevation-1"
                         >
@@ -307,13 +312,11 @@
                             </span>
                           </template>
                           <template v-slot:item.browser="{ item }">
-                            <img
-                              v-if="browserLogos[item.browser]"
-                              :src="browserLogos[item.browser]"
-                              height="16"
-                              class="mr-1"
+                            <browser-agent 
+                              :browser="item.browser" 
+                              :logo="browserLogos[item.browser]"
+                              @show-details="() => showBrowserDetails({browser: item.browser, hits: 0, percentage: 0})"
                             />
-                            {{ item.browser }}
                           </template>
                         </v-data-table>
                       </v-card-text>
@@ -337,19 +340,18 @@
                           dense
                           :items-per-page="10"
                           :footer-props="{
-                            'items-per-page-options': [10, 20, 30, 50, 100]
+                            'items-per-page-options': [10, 20, 30, 50, 100],
+                            'show-first-last-page': true
                           }"
                           class="elevation-1"
                           @click:row="showBrowserDetails"
                         >
                           <template v-slot:item.browser="{ item }">
-                            <img
-                              v-if="browserLogos[item.browser]"
-                              :src="browserLogos[item.browser]"
-                              height="16"
-                              class="mr-1"
+                            <browser-agent 
+                              :browser="item.browser" 
+                              :logo="browserLogos[item.browser]"
+                              @show-details="() => showBrowserDetails(item)"
                             />
-                            {{ item.browser }}
                           </template>
                           <template v-slot:item.percentage="{ item }">
                             {{ item.percentage.toFixed(2) }}%
@@ -376,19 +378,18 @@
                           dense
                           :items-per-page="10"
                           :footer-props="{
-                            'items-per-page-options': [10, 20, 30, 50, 100]
+                            'items-per-page-options': [10, 20, 30, 50, 100],
+                            'show-first-last-page': true
                           }"
                           class="elevation-1"
                           @click:row="showBrowserDetails"
                         >
                           <template v-slot:item.browser="{ item }">
-                            <img
-                              v-if="browserLogos[item.browser]"
-                              :src="browserLogos[item.browser]"
-                              height="16"
-                              class="mr-1"
+                            <browser-agent 
+                              :browser="item.browser" 
+                              :logo="browserLogos[item.browser]"
+                              @show-details="() => showBrowserDetails(item)"
                             />
-                            {{ item.browser }}
                           </template>
                           <template v-slot:item.percentage="{ item }">
                             {{ item.percentage.toFixed(2) }}%
@@ -398,6 +399,47 @@
                       <v-card-text v-else class="text-center pa-5">
                         <v-icon large color="grey">mdi-browser</v-icon>
                         <div class="grey--text mt-2">No browser data available for the selected time range</div>
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                  <!-- Tab 4: Largest Transfers -->
+                  <v-tab-item>
+                    <v-card flat>
+                      <v-card-text v-if="largestTransfers && largestTransfers.length > 0">
+                        <v-data-table
+                          :headers="[
+                            { text: 'URL', value: 'url' },
+                            { text: 'IP Address', value: 'ipAddress' },
+                            { text: 'Transfer Size', value: 'transfer' },
+                            { text: 'Method', value: 'method' },
+                            { text: 'Status', value: 'statusCode' },
+                            { text: 'Date', value: 'date' }
+                          ]"
+                          :items="largestTransfers"
+                          dense
+                          :items-per-page="10"
+                          :footer-props="{
+                            'items-per-page-options': [10, 20, 30, 50, 100],
+                            'show-first-last-page': true
+                          }"
+                          class="elevation-1"
+                        >
+                          <template v-slot:item.ipAddress="{ item }">
+                            <ip-address :ip="item.ipAddress" @find-in-logs="setSearchFilter" />
+                          </template>
+                          <template v-slot:item.statusCode="{ item }">
+                            <span :class="getStatusCodeClass(item.statusCode)">
+                              {{ item.statusCode }}
+                            </span>
+                          </template>
+                          <template v-slot:item.date="{ item }">
+                            {{ formatDate(new Date(item.date)) }}
+                          </template>
+                        </v-data-table>
+                      </v-card-text>
+                      <v-card-text v-else class="text-center pa-5">
+                        <v-icon large color="grey">mdi-file-download</v-icon>
+                        <div class="grey--text mt-2">No transfer data available for the selected time range</div>
                       </v-card-text>
                     </v-card>
                   </v-tab-item>
@@ -417,6 +459,10 @@
         <v-row>
           <v-col cols="12" lg="6">
             <v-card height="100%">
+              <v-card-title>
+                <v-icon left color="white">mdi-chart-bar</v-icon>
+                Summary
+              </v-card-title>
               <v-tabs
                 v-model="tab"
                 background-color="transparent"
@@ -961,6 +1007,9 @@
                   label="Search"
                   single-line
                   hide-details
+                  clearable
+                  prepend-icon="mdi-magnify"
+                  @click:clear="clearSearchFilter"
                 ></v-text-field>
 
                 <v-data-table
@@ -970,6 +1019,7 @@
                   :search="search"
                   :footer-props="{
                     'items-per-page-options': [10, 20, 30],
+                    'show-first-last-page': true
                   }"
                   @click:row="showLogDetails"
                 >
@@ -1063,14 +1113,11 @@
                       {{ value }}
                     </span>
                     <span v-else-if="key === 'browser' && browserLogos[value]">
-                      <img
-                        :src="browserLogos[value]"
-                        :alt="value"
-                        width="16"
-                        height="16"
-                        class="mr-1"
+                      <browser-agent 
+                        :browser="value" 
+                        :logo="browserLogos[value]"
+                        @show-details="() => showBrowserDetails({browser: value, hits: 0, percentage: 0})"
                       />
-                      {{ value }}
                     </span>
                     <span v-else>{{ value }}</span>
                   </td>
@@ -1308,6 +1355,7 @@ import IconDesktop from "./components/icons/IconDesktop.vue";
 import IconMobile from "./components/icons/IconMobile.vue";
 import IconTablet from "./components/icons/IconTablet.vue";
 import IpAddress from "./components/IpAddress.vue";
+import BrowserAgent from "./components/BrowserAgent.vue";
 import { GChart } from "vue-google-charts";
 const prettyBytes = require("pretty-bytes");
 
@@ -1318,6 +1366,7 @@ export default {
     IconMobile,
     IconTablet,
     IpAddress,
+    BrowserAgent,
     GChart,
   },
   created() {
@@ -1382,6 +1431,7 @@ export default {
     ],
     firstParse: null,
     mostUrlsWithoutAssets: [{ url: "/", hits: 0 }],
+    largestTransfers: [], // Store largest transfers by size
     headers: [
       { text: "Date", value: "date", filterable: false },
       { text: "IP Address", value: "ipAddress" },
@@ -2073,6 +2123,12 @@ export default {
         .sort((a, b) => a.hits - b.hits); // Sort ascending by hit count
         
       this.leastUsedBrowsers = leastUsedBrowsers.slice(0, 20);
+
+      // Process largest transfers (by size)
+      this.largestTransfers = this.logs
+        .slice()
+        .sort((a, b) => b.transfer - a.transfer)
+        .slice(0, 20);
     },
     setStartDate: function() {
       if (this.startDatePicker && this.startTimePicker) {
@@ -2625,6 +2681,9 @@ export default {
       }
       return false;
     },
+    clearSearchFilter: function() {
+      this.search = '';
+    }
   },
 };
 </script>
