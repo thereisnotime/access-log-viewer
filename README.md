@@ -44,6 +44,7 @@ Browse agents:
     - [Quick Start Commands](#quick-start-commands)
       - [Using the dev.sh Script](#using-the-devsh-script)
     - [Note](#note)
+  - [GitHub Pages Deployment](#github-pages-deployment)
 
 ## Roadmap
 
@@ -198,3 +199,20 @@ The development server features:
 ### Note
 
 The application has been modified to use the first column for IP addresses in log files rather than automatically detecting them.
+
+## GitHub Pages Deployment
+
+This application can be automatically deployed to GitHub Pages using the included GitHub Actions workflow. When you push to the main branch, the action will:
+
+1. Build the application
+2. Deploy it to the `gh-pages` branch
+3. Make it available at `https://[your-username].github.io/access-log-viewer/`
+
+To enable GitHub Pages for your repository:
+
+1. Go to your repository settings
+2. Navigate to the "Pages" section
+3. Select the `gh-pages` branch as the source
+4. Save the changes
+
+You can also manually trigger the deployment from the "Actions" tab in your repository.
