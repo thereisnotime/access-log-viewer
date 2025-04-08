@@ -59,6 +59,10 @@
         <v-row>
           <v-col cols="12">
             <v-card>
+              <v-card-title class="panel-heading">
+                <v-icon left color="white">mdi-file-multiple</v-icon>
+                Uploaded Files
+              </v-card-title>
               <v-list-item v-for="file in files" :key="file.id" two-line>
                 <v-list-item-content>
                   <v-list-item-title>{{ file.name }}</v-list-item-title>
@@ -84,7 +88,8 @@
         <v-row v-if="allLogs && allLogs.length > 0">
           <v-col cols="12">
             <v-card>
-              <v-card-title>
+              <v-card-title class="panel-heading">
+                <v-icon left color="white">mdi-calendar-range</v-icon>
                 Time Range Filter
                 <v-chip v-if="isFiltered" color="accent" small class="ml-2">Active</v-chip>
               </v-card-title>
@@ -257,7 +262,7 @@
         <v-row>
           <v-col cols="12">
             <v-card>
-              <v-card-title>
+              <v-card-title class="panel-heading">
                 <v-icon left color="white">mdi-shield-alert</v-icon>
                 Security Analysis
               </v-card-title>
@@ -481,7 +486,7 @@
         <v-row>
           <v-col cols="12" lg="6">
             <v-card height="100%">
-              <v-card-title class="d-flex align-center summary-card-title">
+              <v-card-title class="d-flex align-center summary-card-title panel-heading">
                 <v-icon left color="white">mdi-chart-bar</v-icon>
                 <span>Summary</span>
               </v-card-title>
@@ -744,7 +749,10 @@
 
           <v-col cols="12" lg="6">
             <v-card height="100%">
-              <v-card-title>Countries</v-card-title>
+              <v-card-title class="panel-heading">
+                <v-icon left color="white">mdi-earth</v-icon>
+                Countries
+              </v-card-title>
               <v-card-text>
                 <GChart
                   type="GeoChart"
@@ -766,7 +774,10 @@
         <v-row>
           <v-col cols="12" lg="6">
             <v-card height="100%">
-              <v-card-title>Top IP Addresses</v-card-title>
+              <v-card-title class="panel-heading">
+                <v-icon left color="white">mdi-ip-network</v-icon>
+                Top IP Addresses
+              </v-card-title>
               <v-card-text>
                 <v-simple-table>
                   <template v-slot:default>
@@ -818,7 +829,10 @@
 
           <v-col cols="12" lg="6">
             <v-card height="100%">
-              <v-card-title>Browsers</v-card-title>
+              <v-card-title class="panel-heading">
+                <v-icon left color="white">mdi-browser</v-icon>
+                Browsers
+              </v-card-title>
               <v-card-text>
                 <v-simple-table>
                   <template v-slot:default>
@@ -854,7 +868,10 @@
         <v-row>
           <v-col cols="12" lg="3">
             <v-card height="100%">
-              <v-card-title> Sessions by Device </v-card-title>
+              <v-card-title class="panel-heading">
+                <v-icon left color="white">mdi-devices</v-icon>
+                Sessions by Device
+              </v-card-title>
               <v-card-text
                 style="
                   flex-grow: 1;
@@ -908,9 +925,12 @@
 
           <v-col cols="12" lg="4">
             <v-card height="100%">
-              <v-card-title>
+              <v-card-title class="panel-heading">
                 <div style="display: flex; width: 100%">
-                  <div>Most Requested Files</div>
+                  <div>
+                    <v-icon left color="white">mdi-file-document-multiple</v-icon>
+                    Most Requested Files
+                  </div>
                   <v-switch
                     style="margin-left: auto; margin-top: 0"
                     v-model="assetSwitch"
@@ -951,7 +971,10 @@
 
           <v-col cols="12" lg="2">
             <v-card height="100%">
-              <v-card-title> Status Codes </v-card-title>
+              <v-card-title class="panel-heading">
+                <v-icon left color="white">mdi-numeric</v-icon>
+                Status Codes
+              </v-card-title>
               <v-card-text>
                 <v-simple-table dense>
                   <template v-slot:default>
@@ -978,7 +1001,10 @@
 
           <v-col cols="12" lg="3">
             <v-card height="100%">
-              <v-card-title> Top Referrer </v-card-title>
+              <v-card-title class="panel-heading">
+                <v-icon left color="white">mdi-link-variant</v-icon>
+                Top Referrer
+              </v-card-title>
               <v-card-text>
                 <v-simple-table dense>
                   <template v-slot:default>
@@ -1021,7 +1047,10 @@
         <v-row>
           <v-col cols="12">
             <v-card>
-              <v-card-title id="logs-section"> Logs </v-card-title>
+              <v-card-title id="logs-section" class="panel-heading">
+                <v-icon left color="white">mdi-text-box-search</v-icon>
+                Logs
+              </v-card-title>
               <v-card-text v-if="logs.length > 0">
                 <v-text-field
                   v-model="search"
@@ -1567,6 +1596,16 @@ pre {
 
 .theme--light .v-tabs-items {
   border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.panel-heading {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+}
+
+.theme--light .panel-heading {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
 </style>
 <script>

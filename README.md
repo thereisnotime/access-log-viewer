@@ -54,6 +54,7 @@ Browse agents:
 - [ ] Add string filter/search in the Logs panel.
 - [ ] Make the sort on tables work on all data not only the current page.
 - [ ] Improve file loading speed.
+- [ ] Fix design discrepancies.
 - [ ] Add additional file import for IP data (ex. ASN, Country, City, etc. for more details).
 - [ ] Add proper data validators on import.
 - [ ] Improve memory management with a global cache for the full data instead cloning it.
