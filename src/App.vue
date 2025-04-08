@@ -231,6 +231,7 @@
               type="success"
               dense
               outlined
+              color="secondary"
               class="mt-2"
             >
               Showing all {{ allLogs.length }} log entries.
@@ -451,7 +452,7 @@
                   :options="{
                     legend: 'none',
                     datalessRegionColor: $vuetify.theme.dark ? '#333' : '#f5f5f5',
-                    colorAxis: { colors: $vuetify.theme.dark ? ['#214478', '#3d78db'] : ['#a5bbf3', '#0d47a1'] },
+                    colorAxis: { colors: $vuetify.theme.dark ? ['#8f3a3a', '#a71d31'] : ['#ffcdd2', '#8B0000'] },
                     backgroundColor: 'transparent'
                   }"
                 />
@@ -756,7 +757,7 @@
               <v-card-text v-else class="text-center pa-5">
                 <v-icon large color="grey">mdi-table-off</v-icon>
                 <div class="grey--text mt-2">No log entries found for the selected time range</div>
-                <v-btn small color="primary" @click="resetTimeFilter" class="mt-4">Reset Filter</v-btn>
+                <v-btn small color="secondary" @click="resetTimeFilter" class="mt-4">Reset Filter</v-btn>
               </v-card-text>
             </v-card>
           </v-col>
