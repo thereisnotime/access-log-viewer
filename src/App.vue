@@ -1,7 +1,15 @@
 <template>
-  <v-app>
+  <v-app :theme="theme">
     <v-app-bar app color="primary" dark>
-      <div class="d-flex align-center">Access Log Viewer</div>
+      <div class="d-flex align-center">
+        <h1>Access Log Viewer</h1>
+      </div>
+
+      <v-spacer></v-spacer>
+      
+      <v-btn icon @click="toggleTheme">
+        <v-icon>{{ theme === 'dark' ? 'mdi-weather-sunny' : 'mdi-weather-night' }}</v-icon>
+      </v-btn>
     </v-app-bar>
 
     <v-main>
@@ -64,7 +72,7 @@
             <v-card>
               <v-card-title>
                 Time Range Filter
-                <v-chip v-if="isFiltered" color="primary" small class="ml-2">Active</v-chip>
+                <v-chip v-if="isFiltered" color="accent" small class="ml-2">Active</v-chip>
               </v-card-title>
               <v-card-text>
                 <v-row>
@@ -175,7 +183,7 @@
                   </v-col>
                   
                   <v-col cols="12" md="2" class="d-flex align-center">
-                    <v-btn color="primary" @click="applyTimeFilter">Apply Filter</v-btn>
+                    <v-btn color="accent" @click="applyTimeFilter">Apply Filter</v-btn>
                     <v-btn text class="ml-2" @click="resetTimeFilter">Reset</v-btn>
                   </v-col>
                 </v-row>
@@ -183,12 +191,12 @@
                   <v-col cols="12">
                     <div class="d-flex flex-wrap">
                       <span class="mr-2 mt-2">Presets:</span>
-                      <v-btn small :outlined="activePreset === 'today'" class="mr-2 mt-2" :color="activePreset === 'today' ? 'primary' : ''" @click="applyPresetRange('today')">Today</v-btn>
-                      <v-btn small :outlined="activePreset === 'yesterday'" class="mr-2 mt-2" :color="activePreset === 'yesterday' ? 'primary' : ''" @click="applyPresetRange('yesterday')">Yesterday</v-btn>
-                      <v-btn small :outlined="activePreset === 'last7days'" class="mr-2 mt-2" :color="activePreset === 'last7days' ? 'primary' : ''" @click="applyPresetRange('last7days')">Last 7 Days</v-btn>
-                      <v-btn small :outlined="activePreset === 'last30days'" class="mr-2 mt-2" :color="activePreset === 'last30days' ? 'primary' : ''" @click="applyPresetRange('last30days')">Last 30 Days</v-btn>
-                      <v-btn small :outlined="activePreset === 'thisMonth'" class="mr-2 mt-2" :color="activePreset === 'thisMonth' ? 'primary' : ''" @click="applyPresetRange('thisMonth')">This Month</v-btn>
-                      <v-btn small :outlined="activePreset === 'lastMonth'" class="mr-2 mt-2" :color="activePreset === 'lastMonth' ? 'primary' : ''" @click="applyPresetRange('lastMonth')">Last Month</v-btn>
+                      <v-btn small :outlined="activePreset === 'today'" class="mr-2 mt-2" :color="activePreset === 'today' ? 'accent' : ''" @click="applyPresetRange('today')">Today</v-btn>
+                      <v-btn small :outlined="activePreset === 'yesterday'" class="mr-2 mt-2" :color="activePreset === 'yesterday' ? 'accent' : ''" @click="applyPresetRange('yesterday')">Yesterday</v-btn>
+                      <v-btn small :outlined="activePreset === 'last7days'" class="mr-2 mt-2" :color="activePreset === 'last7days' ? 'accent' : ''" @click="applyPresetRange('last7days')">Last 7 Days</v-btn>
+                      <v-btn small :outlined="activePreset === 'last30days'" class="mr-2 mt-2" :color="activePreset === 'last30days' ? 'accent' : ''" @click="applyPresetRange('last30days')">Last 30 Days</v-btn>
+                      <v-btn small :outlined="activePreset === 'thisMonth'" class="mr-2 mt-2" :color="activePreset === 'thisMonth' ? 'accent' : ''" @click="applyPresetRange('thisMonth')">This Month</v-btn>
+                      <v-btn small :outlined="activePreset === 'lastMonth'" class="mr-2 mt-2" :color="activePreset === 'lastMonth' ? 'accent' : ''" @click="applyPresetRange('lastMonth')">Last Month</v-btn>
                     </div>
                   </v-col>
                 </v-row>
@@ -204,9 +212,10 @@
               type="info"
               dense
               outlined
+              color="accent"
             >
               Showing filtered data from {{ startDateFormatted || 'earliest record' }} to {{ endDateFormatted || 'latest record' }}. 
-              <v-btn small color="primary" @click="resetTimeFilter" class="ml-2">Reset Filter</v-btn>
+              <v-btn small color="accent" @click="resetTimeFilter" class="ml-2">Reset Filter</v-btn>
             </v-alert>
             <v-alert
               v-if="isFiltered && logs.length === 0"
@@ -215,7 +224,7 @@
               outlined
             >
               No data found in the selected time range. Please adjust your filter or 
-              <v-btn small color="primary" @click="resetTimeFilter" class="ml-2">Reset Filter</v-btn>
+              <v-btn small color="accent" @click="resetTimeFilter" class="ml-2">Reset Filter</v-btn>
             </v-alert>
             <v-alert
               v-if="!isFiltered && allLogs && allLogs.length > 0"
@@ -261,7 +270,7 @@
                         :options="{
                           legend: 'none',
                           chartArea: { width: '90%', height: '80%' },
-                          colors: $vuetify.theme.dark ? ['#09ade8'] : ['#2196f3'],
+                          colors: $vuetify.theme.dark ? ['#a71d31'] : ['#8B0000'],
                           backgroundColor: 'transparent',
                           pointSize: 6,
                           pointShape: 'circle',
@@ -319,7 +328,7 @@
                         :options="{
                           legend: 'none',
                           chartArea: { width: '90%', height: '80%' },
-                          colors: $vuetify.theme.dark ? ['#09ade8'] : ['#2196f3'],
+                          colors: $vuetify.theme.dark ? ['#a71d31'] : ['#8B0000'],
                           backgroundColor: 'transparent',
                           pointSize: 6,
                           pointShape: 'circle',
@@ -377,7 +386,7 @@
                         :options="{
                           legend: 'none',
                           chartArea: { width: '90%', height: '80%' },
-                          colors: $vuetify.theme.dark ? ['#09ade8'] : ['#2196f3'],
+                          colors: $vuetify.theme.dark ? ['#a71d31'] : ['#8B0000'],
                           backgroundColor: 'transparent',
                           pointSize: 6,
                           pointShape: 'circle',
@@ -781,14 +790,14 @@
     <!-- Log Details Dialog -->
     <v-dialog v-model="logDetailsDialog" max-width="800">
       <v-card>
-        <v-card-title class="headline">
+        <v-card-title class="headline primary white--text">
           Log Details
           <v-spacer></v-spacer>
           <v-btn icon @click="logDetailsDialog = false">
-            <v-icon>mdi-close</v-icon>
+            <v-icon color="white">mdi-close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-text>
+        <v-card-text class="pt-4">
           <v-simple-table dense>
             <template v-slot:default>
               <tbody>
@@ -830,7 +839,7 @@
           
           <div class="mt-4" v-if="selectedLogDetails && selectedLogDetails.raw">
             <v-divider class="mb-3"></v-divider>
-            <div class="subtitle-1 mb-2">Raw Log Entry:</div>
+            <div class="subtitle-1 mb-2 accent--text">Raw Log Entry:</div>
             <v-card outlined class="pa-2 grey lighten-4 black--text" :class="{'grey darken-3 white--text': $vuetify.theme.dark}">
               <pre style="white-space: pre-wrap; word-break: break-all;">{{ selectedLogDetails.raw }}</pre>
             </v-card>
@@ -842,6 +851,15 @@
 </template>
 
 <style>
+@import url("https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900");
+@import url("https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css");
+
+html { overflow-y: auto; }
+
+.v-btn:hover::before {
+  opacity: 0.08;
+}
+
 #dropzone {
   border: 2px dotted #aaa;
   padding: 20px;
@@ -917,6 +935,43 @@ pre {
   font-size: 13px;
   line-height: 1.5;
 }
+
+/* Theme transition */
+.v-application {
+  transition: background-color 0.3s ease;
+}
+
+/* Dark theme enhancements */
+.theme--dark .v-card {
+  background-color: #1e1e1e;
+  border-color: #333;
+}
+
+.theme--dark .v-data-table {
+  background-color: #1e1e1e;
+}
+
+.theme--dark .v-data-table th {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Accent color hover effects */
+.accent {
+  transition: all 0.3s ease;
+}
+
+.accent:hover {
+  filter: brightness(1.2);
+}
+
+/* Night mode toggle button effect */
+.v-btn--icon {
+  transition: transform 0.3s ease;
+}
+
+.v-btn--icon:hover {
+  transform: rotate(30deg);
+}
 </style>
 <script>
 import Worker from "worker-loader!./worker.js";
@@ -935,10 +990,9 @@ export default {
     IconTablet,
     GChart,
   },
-  mounted: function() {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-      this.$vuetify.theme.dark = e.matches;
-    });
+  created() {
+    // Initialize theme
+    this.$vuetify.theme.dark = this.theme === 'dark';
   },
   data: () => ({
     files: [],
@@ -955,7 +1009,7 @@ export default {
     activePreset: '',
     numberOfRequests: 0,
     numberOfSessions: 0,
-    transfer: 0,
+    transfer: "0 B",
     assetSwitch: 0,
     browserLogos: {
       Firefox: require("./assets/browser-logos/firefox_16x16.png"),
@@ -991,7 +1045,11 @@ export default {
       { browser: "Safari", hits: 0 },
       { browser: "Edge", hits: 0 },
     ],
-    mostUrls: [{ url: "/", hits: 0 }],
+    mostUrls: [
+      { url: "/", hits: 0 },
+      { url: "/about", hits: 0 },
+      { url: "/contact", hits: 0 },
+    ],
     firstParse: null,
     mostUrlsWithoutAssets: [{ url: "/", hits: 0 }],
     headers: [
@@ -1002,22 +1060,10 @@ export default {
       { text: "Status", value: "statusCode" },
       { text: "Transfer", value: "transfer", filterable: false },
     ],
-    chartDataSessions: [
-      ["Year", "Sessions"],
-      ["2021", 0],
-      ["2022", 0],
-    ],
-    chartDataRequests: [
-      ["Year", "Requests"],
-      ["2021", 0],
-      ["2022", 0],
-    ],
-    chartDataTransfer: [
-      ["Year", "Bytes"],
-      ["2021", 0],
-      ["2022", 0],
-    ],
-    chartDataMap: [["Country", "Sessions"]],
+    chartDataSessions: [["Time", "Sessions"], ["2022", 0]],
+    chartDataRequests: [["Time", "Requests"], ["2022", 0]],
+    chartDataTransfer: [["Time", "Bytes"], ["2022", { v: 0, f: "0 B" }]],
+    chartDataMap: [["Country", "Sessions"], ["US", 0]],
     startDateMenu: false,
     startDatePicker: null,
     startTimePicker: null,
@@ -1027,6 +1073,7 @@ export default {
     isFiltered: false,
     logDetailsDialog: false,
     selectedLogDetails: null,
+    theme: localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
   }),
   computed: {
     filteredLogDetails() {
@@ -1448,11 +1495,25 @@ export default {
       this.chartDataTransfer = Object.freeze(chartDataTransfer);
 
       const chartDataMap = [];
+      
+      // First add header row
+      chartDataMap.push(["Country", "Sessions"]);
+      
+      // Then add data rows
       for (let country in countryCounter) {
-        chartDataMap.push([country, countryCounter[country]]);
+        // Skip invalid or missing country codes
+        if (country && country.length === 2) {
+          chartDataMap.push([country, countryCounter[country]]);
+        }
       }
-      chartDataMap.sort((a, b) => b[1] - a[1]);
-      chartDataMap.unshift(["Country", "Sessions"]);
+      
+      // Sort by session count (after header row)
+      if (chartDataMap.length > 1) {
+        const header = chartDataMap.shift();
+        chartDataMap.sort((a, b) => b[1] - a[1]);
+        chartDataMap.unshift(header);
+      }
+      
       this.chartDataMap = Object.freeze(chartDataMap);
 
       const mostStatusCodes = [];
@@ -1811,6 +1872,22 @@ export default {
         return 'error';
       }
       return '';
+    },
+    toggleTheme: function() {
+      this.theme = this.theme === 'dark' ? 'light' : 'dark';
+      this.$vuetify.theme.dark = this.theme === 'dark';
+      
+      // Save theme preference to localStorage
+      localStorage.setItem('theme', this.theme);
+      
+      // Force redraw charts to update colors
+      this.$nextTick(() => {
+        const currentTab = this.tab;
+        this.tab = (this.tab + 1) % 3;
+        this.$nextTick(() => {
+          this.tab = currentTab;
+        });
+      });
     },
   },
 };
