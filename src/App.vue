@@ -286,6 +286,9 @@
                   <v-tab>
                     <div class="tab-label">Largest Transfers</div>
                   </v-tab>
+                  <v-tab>
+                    <div class="tab-label">Suspicious Logs</div>
+                  </v-tab>
                   <v-tabs-slider color="primary"></v-tabs-slider>
                 </v-tabs>
                 <v-tabs-items v-model="securityTab">
@@ -468,6 +471,66 @@
                       <v-card-text v-else class="text-center pa-5">
                         <v-icon large color="grey">mdi-file-download</v-icon>
                         <div class="grey--text mt-2">No transfer data available for the selected time range</div>
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                  <!-- Tab 5: Suspicious Logs -->
+                  <v-tab-item>
+                    <v-card flat>
+                      <v-card-text v-if="suspiciousLogs.length > 0">
+                        <v-data-table
+                          :headers="[
+                            { text: 'URL', value: 'url', width: '25%' },
+                            { text: 'IP Address', value: 'ipAddress' },
+                            { text: 'Method', value: 'method' },
+                            { text: 'Status', value: 'statusCode' },
+                            { text: 'Date', value: 'date' },
+                            { text: 'Risk Level', value: 'riskLevel' }
+                          ]"
+                          :items="suspiciousLogs"
+                          dense
+                          :items-per-page="10"
+                          :footer-props="{
+                            'items-per-page-options': [10, 20, 30, 50, 100],
+                            'show-first-last-page': true
+                          }"
+                          class="elevation-1"
+                          @click:row="showLogDetails"
+                        >
+                          <template v-slot:item.url="{ item }">
+                            <span :title="item.url" :class="{'high-risk': item.riskLevel === 'High'}">{{
+                              item.url.substring(0, 40) +
+                              (item.url.length > 40 ? "..." : "")
+                            }}</span>
+                          </template>
+                          <template v-slot:item.ipAddress="{ item }">
+                            <ip-address :ip="item.ipAddress" @find-in-logs="setSearchFilter" />
+                          </template>
+                          <template v-slot:item.method="{ item }">
+                            {{ item.method }}
+                          </template>
+                          <template v-slot:item.statusCode="{ item }">
+                            <span :class="getStatusCodeClass(item.statusCode)">
+                              {{ item.statusCode }}
+                            </span>
+                          </template>
+                          <template v-slot:item.date="{ item }">
+                            {{ formatDate(new Date(item.date)) }}
+                          </template>
+                          <template v-slot:item.riskLevel="{ item }">
+                            <v-chip
+                              small
+                              :color="item.riskLevel === 'High' ? 'error' : item.riskLevel === 'Medium' ? 'warning' : 'info'"
+                              text-color="white"
+                            >
+                              {{ item.riskLevel }}
+                            </v-chip>
+                          </template>
+                        </v-data-table>
+                      </v-card-text>
+                      <v-card-text v-else class="text-center pa-5">
+                        <v-icon large color="grey">mdi-shield-check</v-icon>
+                        <div class="grey--text mt-2">No suspicious logs detected in the selected time range</div>
                       </v-card-text>
                     </v-card>
                   </v-tab-item>
@@ -1607,6 +1670,11 @@ pre {
 .theme--light .panel-heading {
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
+
+.high-risk {
+  color: #ff5252;
+  font-weight: bold;
+}
 </style>
 <script>
 import Worker from "worker-loader!./worker.js";
@@ -1768,6 +1836,7 @@ export default {
       { text: 'Pacific/Honolulu', value: 'Pacific/Honolulu' }
     ],
     showScrollTop: false,
+    suspiciousLogs: [], // Add this to the data section
   }),
   computed: {
     filteredLogDetails() {
@@ -2510,6 +2579,9 @@ export default {
         .slice()
         .sort((a, b) => b.transfer - a.transfer)
         .slice(0, 20);
+
+      // Process suspicious logs
+      this.suspiciousLogs = this.detectSuspiciousLogs(logs);
     },
     setStartDate: function() {
       if (this.startDatePicker && this.startTimePicker) {
@@ -3150,6 +3222,87 @@ export default {
           logsElement.scrollIntoView({ behavior: 'smooth' });
         }
       });
+    },
+    detectSuspiciousLogs: function(logs) {
+      // Define patterns that are considered suspicious
+      const suspiciousPatterns = [
+        { pattern: /admin/i, level: 'Medium' },
+        { pattern: /\.env/i, level: 'High' },
+        { pattern: /wp-admin/i, level: 'Medium' },
+        { pattern: /\.git/i, level: 'High' },
+        { pattern: /\.config/i, level: 'High' },
+        { pattern: /\.sql/i, level: 'High' },
+        { pattern: /\.bak/i, level: 'Medium' },
+        { pattern: /\.zip/i, level: 'Medium' },
+        { pattern: /etc\/passwd/i, level: 'High' },
+        { pattern: /\/config/i, level: 'Medium' },
+        { pattern: /\/api\/user/i, level: 'Medium' },
+        { pattern: /\/login/i, level: 'Low' },
+        { pattern: /select.*from/i, level: 'High' },
+        { pattern: /union\s+select/i, level: 'High' },
+        { pattern: /<script/i, level: 'High' },
+        { pattern: /\.php/i, level: 'Low' }
+      ];
+
+      // Find logs with suspicious patterns
+      const suspicious = [];
+      
+      logs.forEach(log => {
+        if (!log.url) return;
+        
+        // Check against suspicious patterns
+        for (const { pattern, level } of suspiciousPatterns) {
+          if (pattern.test(log.url)) {
+            // Create a copy of the log with risk level
+            const suspiciousLog = { ...log, riskLevel: level };
+            suspicious.push(suspiciousLog);
+            break; // Stop after the first match to avoid duplicates
+          }
+        }
+        
+        // Check for common HTTP methods that might indicate probing
+        if (['PUT', 'DELETE', 'CONNECT', 'TRACE', 'OPTIONS'].includes(log.method)) {
+          const methodLog = { ...log, riskLevel: 'Medium' };
+          if (!suspicious.some(s => s.url === log.url && s.date === log.date)) {
+            suspicious.push(methodLog);
+          }
+        }
+        
+        // Check for high number of 4xx/5xx status codes from same IP
+        if (log.statusCode >= 400) {
+          const existingIP = suspicious.find(s => 
+            s.ipAddress === log.ipAddress && 
+            !suspicious.some(sl => sl.url === log.url && sl.date === log.date)
+          );
+          
+          if (!existingIP && !suspicious.some(s => s.url === log.url && s.date === log.date)) {
+            suspicious.push({ ...log, riskLevel: 'Low' });
+          }
+        }
+      });
+      
+      // Sort by risk level (High, Medium, Low) and then by date
+      suspicious.sort((a, b) => {
+        const riskOrder = { 'High': 0, 'Medium': 1, 'Low': 2 };
+        if (riskOrder[a.riskLevel] !== riskOrder[b.riskLevel]) {
+          return riskOrder[a.riskLevel] - riskOrder[b.riskLevel];
+        }
+        return b.date - a.date;
+      });
+      
+      // Remove duplicates (same URL and date)
+      const uniqueSuspicious = [];
+      const seen = new Set();
+      
+      suspicious.forEach(log => {
+        const key = `${log.url}-${log.date}`;
+        if (!seen.has(key)) {
+          uniqueSuspicious.push(log);
+          seen.add(key);
+        }
+      });
+      
+      return uniqueSuspicious;
     },
   },
   mounted() {
