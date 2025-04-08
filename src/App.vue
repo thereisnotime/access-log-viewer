@@ -3,7 +3,7 @@
     <v-app-bar app color="primary" dark>
       <div class="d-flex align-center">
         <v-icon class="mr-2" large>mdi-shield-lock</v-icon>
-        <h1>Security Access Log Viewer</h1>
+        <h1>SALV - Security Access Log Viewer</h1>
       </div>
 
       <v-spacer></v-spacer>
@@ -245,7 +245,7 @@
           <v-col cols="12">
             <v-card>
               <v-card-title>
-                <v-icon left color="accent">mdi-shield-alert</v-icon>
+                <v-icon left color="white">mdi-shield-alert</v-icon>
                 Security Analysis
               </v-card-title>
               
@@ -254,20 +254,20 @@
                   v-model="securityTab"
                   background-color="transparent"
                   grow
+                  id="tabs"
                 >
-                  <v-tabs-slider color="accent"></v-tabs-slider>
                   <v-tab>
-                    <v-icon left>mdi-alert-circle</v-icon>
-                    Top IPs with Errors
+                    <div>Top IPs with Errors</div>
                   </v-tab>
                   <v-tab>
                     <v-icon left>mdi-browser-outline</v-icon>
-                    Least Used Browsers
+                    <div>Least Used Browsers</div>
                   </v-tab>
                   <v-tab>
                     <v-icon left>mdi-browser</v-icon>
-                    Most Used Browsers
+                    <div>Most Used Browsers</div>
                   </v-tab>
+                  <v-tabs-slider color="primary"></v-tabs-slider>
                 </v-tabs>
                 <v-tabs-items v-model="securityTab">
                   <!-- Tab 1: Top 20 IPs by 4xx and 5xx errors -->
@@ -291,7 +291,7 @@
                           class="elevation-1"
                         >
                           <template v-slot:item.ip="{ item }">
-                            <ip-address :ip="item.ip" />
+                            <ip-address :ip="item.ip" @find-in-logs="setSearchFilter" />
                           </template>
                           <template v-slot:item.country="{ item }">
                             <span v-if="item.country">
@@ -420,21 +420,26 @@
               <v-tabs
                 v-model="tab"
                 background-color="transparent"
+                grow
                 id="tabs"
               >
-                <v-tabs-slider color="accent"></v-tabs-slider>
-                <v-tab class="text-capitalize">
+                <v-tab>
+                  <v-icon class="mb-2">mdi-chart-timeline</v-icon>
                   <div>Sessions</div>
-                  <div class="text-h6">{{ numberOfSessions }}</div>
                 </v-tab>
-                <v-tab class="text-capitalize">
+                <v-tab>
+                  <v-icon class="mb-2">mdi-earth</v-icon>
                   <div>Requests</div>
-                  <div class="text-h6">{{ numberOfRequests }}</div>
                 </v-tab>
-                <v-tab class="text-capitalize">
-                  <div>Transfer</div>
-                  <div class="text-h6">{{ transfer }}</div>
+                <v-tab>
+                  <v-icon class="mb-2">mdi-format-list-bulleted</v-icon>
+                  <div>Traffic</div>
                 </v-tab>
+                <v-tab>
+                  <v-icon class="mb-2">mdi-shield-account</v-icon>
+                  <div>Users</div>
+                </v-tab>
+                <v-tabs-slider color="primary"></v-tabs-slider>
               </v-tabs>
               <v-tabs-items v-model="tab">
                 <v-tab-item :transition="false">
@@ -611,6 +616,61 @@
                     </v-card-text>
                   </v-card>
                 </v-tab-item>
+                <v-tab-item :transition="false">
+                  <v-card flat v-if="tab === 3">
+                    <v-card-text v-if="logs.length > 0">
+                      <v-simple-table dense>
+                        <template v-slot:default>
+                          <thead>
+                            <tr>
+                              <th class="text-left">IP Address</th>
+                              <th class="text-left">Country</th>
+                              <th class="text-left">Network</th>
+                              <th class="text-left">Browser</th>
+                              <th class="text-right">Requests</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="(item, i) in mostIPs" :key="i">
+                              <td class="text-left">
+                                <ip-address :ip="item.ip || '-'" @find-in-logs="setSearchFilter" />
+                              </td>
+                              <td class="text-left">
+                                <img
+                                  v-if="item.country && item.country.length === 2"
+                                  width="16" 
+                                  height="16"
+                                  :src="`https://flagcdn.com/16x12/${item.country.toLowerCase()}.png`"
+                                  :alt="item.country"
+                                  class="mr-1"
+                                />
+                                {{ item.country || 'Unknown' }}
+                              </td>
+                              <td class="text-left">{{ item.network || 'Unknown' }}</td>
+                              <td class="text-left">
+                                <img
+                                  v-if="item.browser && browserLogos[item.browser]"
+                                  :src="browserLogos[item.browser]"
+                                  :alt="item.browser"
+                                  width="16"
+                                  height="16"
+                                  class="mr-1"
+                                />
+                                {{ item.browser || 'Unknown' }}
+                              </td>
+                              <td class="text-right">{{ item.hits || 0 }}</td>
+                            </tr>
+                          </tbody>
+                        </template>
+                      </v-simple-table>
+                    </v-card-text>
+                    <v-card-text v-else class="text-center pa-5">
+                      <v-icon large color="grey">mdi-table-off</v-icon>
+                      <div class="grey--text mt-2">No log entries found for the selected time range</div>
+                      <v-btn small color="secondary" @click="resetTimeFilter" class="mt-4">Reset Filter</v-btn>
+                    </v-card-text>
+                  </v-card>
+                </v-tab-item>
               </v-tabs-items>
             </v-card>
           </v-col>
@@ -655,7 +715,7 @@
                     <tbody>
                       <tr v-for="(item, i) in mostIPs" :key="i">
                         <td class="text-left">
-                          <ip-address :ip="item.ip || '-'" />
+                          <ip-address :ip="item.ip || '-'" @find-in-logs="setSearchFilter" />
                         </td>
                         <td class="text-left">
                           <img
@@ -894,7 +954,7 @@
         <v-row>
           <v-col cols="12">
             <v-card>
-              <v-card-title> Logs </v-card-title>
+              <v-card-title id="logs-section"> Logs </v-card-title>
               <v-card-text v-if="logs.length > 0">
                 <v-text-field
                   v-model="search"
@@ -914,7 +974,7 @@
                   @click:row="showLogDetails"
                 >
                   <template v-slot:item.ipAddress="{ item }">
-                    <ip-address :ip="item.ipAddress" />
+                    <ip-address :ip="item.ipAddress" @find-in-logs="setSearchFilter" />
                   </template>
                   <template v-slot:item.transfer="{ item }">
                     {{ prettyBytes(item.transfer) }}
@@ -948,7 +1008,7 @@
       <v-card flat tile width="100%" class="primary lighten-1 text-center">
         <v-card-text>
           <v-btn class="mx-4" icon>
-            <a href="https://github.com/rolandstarke/access-log-viewer"
+            <a href="https://github.com/thereisnotime/access-log-viewer"
               ><img
                 src="images/GitHub-Mark-Light-32px.png"
                 height="32"
@@ -1136,10 +1196,18 @@
 }
 
 #tabs .v-tabs-bar {
-  height: 70px !important;
+  height: 100px !important; /* Increase height to add more space */
+  padding-top: 0; /* Remove top padding */
 }
 #tabs .v-tab {
   flex-direction: column;
+  padding-bottom: 0; /* Remove bottom padding */
+  margin-bottom: 30px; /* Add bottom margin instead */
+}
+/* Override the v-tabs-slider color */
+#tabs .v-tabs-slider {
+  background-color: #8B0000 !important; /* Primary dark red color */
+  bottom: 0 !important; /* Reset the slider position */
 }
 .theme--dark.v-tabs > .v-tabs-bar .v-tab.v-tab--active {
   color: #fff;
@@ -2293,6 +2361,18 @@ export default {
         this.$nextTick(() => {
           this.tab = currentTab;
         });
+      });
+    },
+    setSearchFilter: function(ip) {
+      // Set search filter to the IP address and scroll to logs section
+      this.search = ip;
+      
+      // Scroll to the logs section
+      this.$nextTick(() => {
+        const logsElement = document.getElementById('logs-section');
+        if (logsElement) {
+          logsElement.scrollIntoView({ behavior: 'smooth' });
+        }
       });
     },
     showBrowserDetails: function(item) {

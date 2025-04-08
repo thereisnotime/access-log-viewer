@@ -19,6 +19,13 @@
       >
         <v-list-item-title>{{ item.title }}</v-list-item-title>
       </v-list-item>
+      <v-divider></v-divider>
+      <v-list-item dense @click="findInLogs">
+        <v-list-item-icon class="mr-2">
+          <v-icon small>mdi-magnify</v-icon>
+        </v-list-item-icon>
+        <v-list-item-title>Find in Logs</v-list-item-title>
+      </v-list-item>
     </v-list>
   </v-menu>
 </template>
@@ -84,6 +91,10 @@ export default {
   methods: {
     openUrl(url) {
       window.open(url, '_blank');
+      this.showMenu = false;
+    },
+    findInLogs() {
+      this.$emit('find-in-logs', this.ip);
       this.showMenu = false;
     }
   }

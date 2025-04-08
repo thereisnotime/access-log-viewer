@@ -2,6 +2,7 @@
   <span 
     class="ip-wrapper" 
     @contextmenu.prevent="showContextMenu"
+    @click="showContextMenu"
     tabindex="0"
     @keyup.enter="showContextMenu"
   >
@@ -13,6 +14,7 @@
       :x="x"
       :y="y"
       @close="closeContextMenu"
+      @find-in-logs="findInLogs"
     />
   </span>
 </template>
@@ -47,6 +49,9 @@ export default {
     },
     closeContextMenu() {
       this.contextMenuOpen = false;
+    },
+    findInLogs(ip) {
+      this.$emit('find-in-logs', ip);
     }
   }
 }
@@ -54,7 +59,7 @@ export default {
 
 <style scoped>
 .ip-wrapper {
-  cursor: context-menu;
+  cursor: pointer;
   position: relative;
   border-bottom: 1px dotted rgba(128, 128, 128, 0.4);
 }

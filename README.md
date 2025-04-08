@@ -1,6 +1,8 @@
-# Security Access Log Viewer
+# SALV - Security Access Log Viewer
 
 A fork of the access-log-viewer with features on top of the original to help security investigations.
+
+Try it out at [https://thereisnotime.github.io/access-log-viewer/](https://thereisnotime.github.io/access-log-viewer/)
 
 ![access log viewer apache and nginx](public/ss01.png)
 
@@ -26,7 +28,7 @@ Browse agents:
 
 ## Table of Contents
 
-- [Security Access Log Viewer](#security-access-log-viewer)
+- [SALV - Security Access Log Viewer](#salv---security-access-log-viewer)
   - [Table of Contents](#table-of-contents)
   - [Roadmap](#roadmap)
   - [Features](#features)
@@ -57,6 +59,8 @@ Browse agents:
 - [ ] Improve memory management with a global cache for the full data instead cloning it.
 - [ ] Update Node and all packages to the latest version.
 - [ ] Add support for Traefik/Caddy/Envoy/Squid/HAProxy.
+- [ ] Add statistics panel about the input data.
+- [ ] Add a pipeline on schedule to auto-update GeoIP data.
 
 ## Features
 
