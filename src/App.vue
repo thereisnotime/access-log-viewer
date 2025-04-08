@@ -1491,15 +1491,50 @@ export default {
     browserUserAgents: [],
     timezone: 'UTC',
     timezones: [
-      { text: 'UTC/GMT', value: 'UTC' },
-      { text: 'Eastern Time (EST/EDT)', value: 'America/New_York' },
-      { text: 'Central Time (CST/CDT)', value: 'America/Chicago' },
-      { text: 'Mountain Time (MST/MDT)', value: 'America/Denver' },
-      { text: 'Pacific Time (PST/PDT)', value: 'America/Los_Angeles' },
-      { text: 'London (GMT/BST)', value: 'Europe/London' },
-      { text: 'Paris (CET/CEST)', value: 'Europe/Paris' },
-      { text: 'Tokyo (JST)', value: 'Asia/Tokyo' },
-      { text: 'Sydney (AEST/AEDT)', value: 'Australia/Sydney' }
+      { text: 'UTC', value: 'UTC' },
+      { text: 'Africa/Cairo', value: 'Africa/Cairo' },
+      { text: 'Africa/Johannesburg', value: 'Africa/Johannesburg' },
+      { text: 'Africa/Lagos', value: 'Africa/Lagos' },
+      { text: 'Africa/Nairobi', value: 'Africa/Nairobi' },
+      { text: 'America/Anchorage', value: 'America/Anchorage' },
+      { text: 'America/Bogota', value: 'America/Bogota' },
+      { text: 'America/Chicago', value: 'America/Chicago' },
+      { text: 'America/Denver', value: 'America/Denver' },
+      { text: 'America/Los_Angeles', value: 'America/Los_Angeles' },
+      { text: 'America/Mexico_City', value: 'America/Mexico_City' },
+      { text: 'America/New_York', value: 'America/New_York' },
+      { text: 'America/Phoenix', value: 'America/Phoenix' },
+      { text: 'America/Santiago', value: 'America/Santiago' },
+      { text: 'America/Sao_Paulo', value: 'America/Sao_Paulo' },
+      { text: 'America/Toronto', value: 'America/Toronto' },
+      { text: 'Asia/Bangkok', value: 'Asia/Bangkok' },
+      { text: 'Asia/Dubai', value: 'Asia/Dubai' },
+      { text: 'Asia/Hong_Kong', value: 'Asia/Hong_Kong' },
+      { text: 'Asia/Jakarta', value: 'Asia/Jakarta' },
+      { text: 'Asia/Jerusalem', value: 'Asia/Jerusalem' },
+      { text: 'Asia/Kolkata', value: 'Asia/Kolkata' },
+      { text: 'Asia/Seoul', value: 'Asia/Seoul' },
+      { text: 'Asia/Shanghai', value: 'Asia/Shanghai' },
+      { text: 'Asia/Singapore', value: 'Asia/Singapore' },
+      { text: 'Asia/Tokyo', value: 'Asia/Tokyo' },
+      { text: 'Australia/Melbourne', value: 'Australia/Melbourne' },
+      { text: 'Australia/Perth', value: 'Australia/Perth' },
+      { text: 'Australia/Sydney', value: 'Australia/Sydney' },
+      { text: 'Europe/Amsterdam', value: 'Europe/Amsterdam' },
+      { text: 'Europe/Athens', value: 'Europe/Athens' },
+      { text: 'Europe/Berlin', value: 'Europe/Berlin' },
+      { text: 'Europe/Istanbul', value: 'Europe/Istanbul' },
+      { text: 'Europe/Kiev', value: 'Europe/Kiev' },
+      { text: 'Europe/London', value: 'Europe/London' },
+      { text: 'Europe/Madrid', value: 'Europe/Madrid' },
+      { text: 'Europe/Moscow', value: 'Europe/Moscow' },
+      { text: 'Europe/Paris', value: 'Europe/Paris' },
+      { text: 'Europe/Rome', value: 'Europe/Rome' },
+      { text: 'Europe/Sofia', value: 'Europe/Sofia' },
+      { text: 'Europe/Stockholm', value: 'Europe/Stockholm' },
+      { text: 'Europe/Zurich', value: 'Europe/Zurich' },
+      { text: 'Pacific/Auckland', value: 'Pacific/Auckland' },
+      { text: 'Pacific/Honolulu', value: 'Pacific/Honolulu' }
     ],
     showScrollTop: false,
   }),
@@ -1819,25 +1854,60 @@ export default {
         }
 
         let time;
-        if (splitTime === "hour") {
-          time =
-            log.date.toLocaleDateString() +
-            " " +
-            log.date.getHours().toString().padStart(2, "0") +
-            ":00";
-          dates[time] = new Date(
-            log.date.getFullYear(),
-            log.date.getMonth(),
-            log.date.getDate(),
-            log.date.getHours()
-          );
-        } else if (splitTime === "day") {
-          time = log.date.toLocaleDateString();
-          dates[time] = new Date(
-            log.date.getFullYear(),
-            log.date.getMonth(),
-            log.date.getDate()
-          );
+        let timeDate;
+        
+        // Format with timezone properly for chart aggregation
+        try {
+          // Create a formatted date string that respects the selected timezone
+          // Get a timezone-adjusted date object
+          const adjustedDate = new Date(log.date.toLocaleString('en-US', { timeZone: this.timezone }));
+          
+          if (splitTime === "hour") {
+            // Format as localized hour for aggregation key
+            time = adjustedDate.toLocaleDateString() + " " + 
+                  adjustedDate.getHours().toString().padStart(2, "0") + ":00";
+                  
+            // Store the timezone-adjusted date for the chart
+            timeDate = new Date(
+              adjustedDate.getFullYear(),
+              adjustedDate.getMonth(),
+              adjustedDate.getDate(),
+              adjustedDate.getHours()
+            );
+          } else if (splitTime === "day") {
+            // Format as localized day for aggregation key
+            time = adjustedDate.toLocaleDateString();
+            
+            // Store the timezone-adjusted date for the chart
+            timeDate = new Date(
+              adjustedDate.getFullYear(),
+              adjustedDate.getMonth(),
+              adjustedDate.getDate()
+            );
+          }
+          
+          dates[time] = timeDate;
+        } catch (e) {
+          console.error("Error applying timezone to chart data:", e);
+          
+          // Fallback to original behavior
+          if (splitTime === "hour") {
+            time = log.date.toLocaleDateString() + " " + 
+                  log.date.getHours().toString().padStart(2, "0") + ":00";
+            dates[time] = new Date(
+              log.date.getFullYear(),
+              log.date.getMonth(),
+              log.date.getDate(),
+              log.date.getHours()
+            );
+          } else if (splitTime === "day") {
+            time = log.date.toLocaleDateString();
+            dates[time] = new Date(
+              log.date.getFullYear(),
+              log.date.getMonth(),
+              log.date.getDate()
+            );
+          }
         }
         
         requestCounter[time] = requestCounter[time] + 1 || 1;
@@ -1883,26 +1953,62 @@ export default {
         }
         
         let time;
-        if (splitTime === "hour") {
-          time =
-            session.date.toLocaleDateString() +
-            " " +
-            session.date.getHours().toString().padStart(2, "0") +
-            ":00";
-          dates[time] = new Date(
-            session.date.getFullYear(),
-            session.date.getMonth(),
-            session.date.getDate(),
-            session.date.getHours()
-          );
-        } else if (splitTime === "day") {
-          time = session.date.toLocaleDateString();
-          dates[time] = new Date(
-            session.date.getFullYear(),
-            session.date.getMonth(),
-            session.date.getDate()
-          );
+        let timeDate;
+        
+        // Format with timezone properly for chart aggregation
+        try {
+          // Create a formatted date string that respects the selected timezone
+          // Get a timezone-adjusted date object
+          const adjustedDate = new Date(session.date.toLocaleString('en-US', { timeZone: this.timezone }));
+          
+          if (splitTime === "hour") {
+            // Format as localized hour for aggregation key
+            time = adjustedDate.toLocaleDateString() + " " + 
+                  adjustedDate.getHours().toString().padStart(2, "0") + ":00";
+                  
+            // Store the timezone-adjusted date for the chart
+            timeDate = new Date(
+              adjustedDate.getFullYear(),
+              adjustedDate.getMonth(),
+              adjustedDate.getDate(),
+              adjustedDate.getHours()
+            );
+          } else if (splitTime === "day") {
+            // Format as localized day for aggregation key
+            time = adjustedDate.toLocaleDateString();
+            
+            // Store the timezone-adjusted date for the chart
+            timeDate = new Date(
+              adjustedDate.getFullYear(),
+              adjustedDate.getMonth(),
+              adjustedDate.getDate()
+            );
+          }
+          
+          dates[time] = timeDate;
+        } catch (e) {
+          console.error("Error applying timezone to chart data:", e);
+          
+          // Fallback to original behavior
+          if (splitTime === "hour") {
+            time = session.date.toLocaleDateString() + " " + 
+                  session.date.getHours().toString().padStart(2, "0") + ":00";
+            dates[time] = new Date(
+              session.date.getFullYear(),
+              session.date.getMonth(),
+              session.date.getDate(),
+              session.date.getHours()
+            );
+          } else if (splitTime === "day") {
+            time = session.date.toLocaleDateString();
+            dates[time] = new Date(
+              session.date.getFullYear(),
+              session.date.getMonth(),
+              session.date.getDate()
+            );
+          }
         }
+        
         sessionCounter[time] = sessionCounter[time] + 1 || 1;
       });
 
@@ -2799,6 +2905,27 @@ export default {
       }
       if (this.endDate) {
         this.endDateFormatted = this.formatDateTime(this.endDate);
+      }
+      
+      // Force update on all charts and tables
+      if (this.allLogs && this.allLogs.length > 0) {
+        // Recalculate values based on current filter status
+        if (this.isFiltered) {
+          this.applyTimeFilter();
+        } else {
+          // Force recalculation of all values with full dataset
+          this.calculateValues(this.allLogs, this.allSessions);
+        }
+        
+        // Trigger update on dashboard components
+        this.$nextTick(() => {
+          // Ensure charts refresh properly by temporarily switching tabs
+          const currentTab = this.tab;
+          this.tab = (this.tab + 1) % 3;
+          this.$nextTick(() => { 
+            this.tab = currentTab;
+          });
+        });
       }
     }
   },
