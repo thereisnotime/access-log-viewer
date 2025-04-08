@@ -6,6 +6,10 @@ View Nginx and Apache access.log files in your Browser. Fork that adds security 
 
 ![access log viewer apache and nginx](preview.jpeg)
 
+## Roadmap
+
+- [ ] Add exception list (ex. health checks and liveness probes).
+
 ## Features
 
 ### Visitors

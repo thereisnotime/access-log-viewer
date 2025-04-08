@@ -58,6 +58,159 @@
           </v-col>
         </v-row>
 
+        <!-- Time Range Filter -->
+        <v-row v-if="logs.length > 0">
+          <v-col cols="12">
+            <v-card>
+              <v-card-title>
+                Time Range Filter
+                <v-chip v-if="isFiltered" color="primary" small class="ml-2">Active</v-chip>
+              </v-card-title>
+              <v-card-text>
+                <v-row>
+                  <v-col cols="12" sm="6" md="5">
+                    <v-text-field
+                      v-model="startDateFormatted"
+                      label="Start Date & Time"
+                      prepend-icon="mdi-calendar"
+                      readonly
+                      @click="startDateMenu = true"
+                      @click:clear="startDate = null"
+                      clearable
+                    ></v-text-field>
+                    
+                    <v-dialog
+                      v-model="startDateMenu"
+                      persistent
+                      width="auto"
+                    >
+                      <v-card>
+                        <v-card-title>Select Start Date and Time</v-card-title>
+                        <v-card-text>
+                          <v-row>
+                            <v-col cols="12" sm="6">
+                              <v-date-picker
+                                v-model="startDatePicker"
+                                scrollable
+                              ></v-date-picker>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                              <v-time-picker
+                                v-model="startTimePicker"
+                                format="24hr"
+                              ></v-time-picker>
+                            </v-col>
+                          </v-row>
+                        </v-card-text>
+                        <v-card-actions>
+                          <v-spacer></v-spacer>
+                          <v-btn
+                            text
+                            @click="startDateMenu = false"
+                          >
+                            Cancel
+                          </v-btn>
+                          <v-btn
+                            color="primary"
+                            @click="setStartDate(); startDateMenu = false"
+                          >
+                            OK
+                          </v-btn>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
+                  </v-col>
+                  
+                  <v-col cols="12" sm="6" md="5">
+                    <v-text-field
+                      v-model="endDateFormatted"
+                      label="End Date & Time"
+                      prepend-icon="mdi-calendar"
+                      readonly
+                      @click="endDateMenu = true"
+                      @click:clear="endDate = null"
+                      clearable
+                    ></v-text-field>
+                    
+                    <v-dialog
+                      v-model="endDateMenu"
+                      persistent
+                      width="auto"
+                    >
+                      <v-card>
+                        <v-card-title>Select End Date and Time</v-card-title>
+                        <v-card-text>
+                          <v-row>
+                            <v-col cols="12" sm="6">
+                              <v-date-picker
+                                v-model="endDatePicker"
+                                scrollable
+                              ></v-date-picker>
+                            </v-col>
+                            <v-col cols="12" sm="6">
+                              <v-time-picker
+                                v-model="endTimePicker"
+                                format="24hr"
+                              ></v-time-picker>
+                            </v-col>
+                          </v-row>
+                        </v-card-text>
+                        <v-card-actions>
+                          <v-spacer></v-spacer>
+                          <v-btn
+                            text
+                            @click="endDateMenu = false"
+                          >
+                            Cancel
+                          </v-btn>
+                          <v-btn
+                            color="primary"
+                            @click="setEndDate(); endDateMenu = false"
+                          >
+                            OK
+                          </v-btn>
+                        </v-card-actions>
+                      </v-card>
+                    </v-dialog>
+                  </v-col>
+                  
+                  <v-col cols="12" md="2" class="d-flex align-center">
+                    <v-btn color="primary" @click="applyTimeFilter">Apply Filter</v-btn>
+                    <v-btn text class="ml-2" @click="resetTimeFilter">Reset</v-btn>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="12">
+                    <div class="d-flex flex-wrap">
+                      <span class="mr-2 mt-2">Presets:</span>
+                      <v-btn small :outlined="activePreset === 'today'" class="mr-2 mt-2" :color="activePreset === 'today' ? 'primary' : ''" @click="applyPresetRange('today')">Today</v-btn>
+                      <v-btn small :outlined="activePreset === 'yesterday'" class="mr-2 mt-2" :color="activePreset === 'yesterday' ? 'primary' : ''" @click="applyPresetRange('yesterday')">Yesterday</v-btn>
+                      <v-btn small :outlined="activePreset === 'last7days'" class="mr-2 mt-2" :color="activePreset === 'last7days' ? 'primary' : ''" @click="applyPresetRange('last7days')">Last 7 Days</v-btn>
+                      <v-btn small :outlined="activePreset === 'last30days'" class="mr-2 mt-2" :color="activePreset === 'last30days' ? 'primary' : ''" @click="applyPresetRange('last30days')">Last 30 Days</v-btn>
+                      <v-btn small :outlined="activePreset === 'thisMonth'" class="mr-2 mt-2" :color="activePreset === 'thisMonth' ? 'primary' : ''" @click="applyPresetRange('thisMonth')">This Month</v-btn>
+                      <v-btn small :outlined="activePreset === 'lastMonth'" class="mr-2 mt-2" :color="activePreset === 'lastMonth' ? 'primary' : ''" @click="applyPresetRange('lastMonth')">Last Month</v-btn>
+                    </div>
+                  </v-col>
+                </v-row>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+
+        <v-row v-if="logs.length > 0">
+          <v-col cols="12">
+            <v-alert
+              v-if="isFiltered"
+              type="info"
+              dense
+              outlined
+            >
+              Showing filtered data from {{ startDateFormatted || 'earliest record' }} to {{ endDateFormatted || 'latest record' }}. 
+              <v-btn x-small text color="primary" @click="resetTimeFilter">Reset Filter</v-btn>
+            </v-alert>
+          </v-col>
+        </v-row>
+
         <v-row>
           <v-col cols="12" lg="6">
             <v-card height="100%">
@@ -620,6 +773,13 @@ export default {
     tab: 0,
     search: "",
     logs: [],
+    allLogs: [], // Store all logs before filtering
+    allSessions: [], // Store all sessions before filtering
+    startDate: null,
+    endDate: null,
+    startDateFormatted: '',
+    endDateFormatted: '',
+    activePreset: '',
     numberOfRequests: 0,
     numberOfSessions: 0,
     transfer: 0,
@@ -685,6 +845,13 @@ export default {
       ["2022", 0],
     ],
     chartDataMap: [["Country", "Sessions"]],
+    startDateMenu: false,
+    startDatePicker: null,
+    startTimePicker: null,
+    endDateMenu: false,
+    endDatePicker: null,
+    endTimePicker: null,
+    isFiltered: false,
   }),
   methods: {
     prettyBytes: prettyBytes,
@@ -840,26 +1007,42 @@ export default {
         file.parsed = await fetch("sample.access.log.gz")
           .then(r => r.blob())
           .then((l) => this.parseLog(l, file));
-        console.log("Sample file loaded:", file.parsed.logs.length, "logs");
         this.calculateValues();
       } catch (error) {
         console.error("Error loading sample file:", error);
       }
     },
-    calculateValues: function () {
+    calculateValues: function (filteredLogs, filteredSessions) {
       let logs = [];
       let sessions = [];
-      for (let i = 0; i < this.files.length; i++) {
-        if (this.files[i].parsed) {
-          logs = logs.concat(this.files[i].parsed.logs);
-          sessions = sessions.concat(this.files[i].parsed.sessions);
+      
+      if (filteredLogs && filteredSessions) {
+        // If we're given filtered data, use it
+        logs = filteredLogs;
+        sessions = filteredSessions;
+      } else {
+        // Otherwise collect from all files
+        for (let i = 0; i < this.files.length; i++) {
+          if (this.files[i].parsed) {
+            logs = logs.concat(this.files[i].parsed.logs);
+            sessions = sessions.concat(this.files[i].parsed.sessions);
+          }
+        }
+        logs.sort((a, b) => b.date - a.date);
+        sessions.sort((a, b) => b.date - a.date);
+        
+        // Store the complete dataset for filtering
+        this.allLogs = Object.freeze([...logs]);
+        this.allSessions = Object.freeze([...sessions]);
+        
+        // Initialize date range on first load
+        if (!this.startDate || !this.endDate) {
+          this.initDateRange(logs);
         }
       }
-      logs.sort((a, b) => b.date - a.date);
-      sessions.sort((a, b) => b.date - a.date);
 
-
-      this.logs = Object.freeze(logs); //for perfomrance reasons, so vue does not observe it
+      // Always update the logs data to ensure data tables and visualizations reflect correct data
+      this.logs = Object.freeze(logs); 
       this.numberOfRequests = logs.length;
       this.numberOfSessions = sessions.length;
 
@@ -1116,8 +1299,194 @@ export default {
         });
       }
       mostIPs.sort((a, b) => b.hits - a.hits);
-      console.log("Top IPs:", mostIPs.slice(0, 3)); // Debug the top 3 IPs
       this.mostIPs = mostIPs.slice(0, 10);
+    },
+    setStartDate: function() {
+      if (this.startDatePicker && this.startTimePicker) {
+        const [year, month, day] = this.startDatePicker.split('-');
+        const [hours, minutes] = this.startTimePicker.split(':');
+        this.startDate = new Date(year, month - 1, day, hours, minutes);
+        this.startDateFormatted = this.formatDateTime(this.startDate);
+      }
+    },
+    
+    setEndDate: function() {
+      if (this.endDatePicker && this.endTimePicker) {
+        const [year, month, day] = this.endDatePicker.split('-');
+        const [hours, minutes] = this.endTimePicker.split(':');
+        this.endDate = new Date(year, month - 1, day, hours, minutes);
+        this.endDateFormatted = this.formatDateTime(this.endDate);
+      }
+    },
+    
+    formatDateTime: function(date) {
+      if (!date) return '';
+      return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+    },
+    
+    applyTimeFilter: function() {
+      if (this.allLogs.length > 0) {
+        let filteredLogs = [...this.allLogs];
+        let filteredSessions = [...this.allSessions];
+        
+        if (this.startDate) {
+          filteredLogs = filteredLogs.filter(log => log.date >= this.startDate);
+          filteredSessions = filteredSessions.filter(session => session.date >= this.startDate);
+        }
+        
+        if (this.endDate) {
+          filteredLogs = filteredLogs.filter(log => log.date <= this.endDate);
+          filteredSessions = filteredSessions.filter(session => session.date <= this.endDate);
+        }
+        
+        // Apply the filtered data to logs AND recalculate all visualizations
+        this.calculateValues(filteredLogs, filteredSessions);
+        this.isFiltered = true;
+      }
+    },
+    
+    resetTimeFilter: function() {
+      // Reset filter state
+      this.isFiltered = false;
+      this.activePreset = ''; // Clear active preset
+      
+      if (this.allLogs.length > 0) {
+        // Restore original data
+        this.logs = Object.freeze(this.allLogs);
+        
+        // Reset date/time UI components but keep original range values
+        const sortedLogs = [...this.allLogs].sort((a, b) => a.date - b.date);
+        if (sortedLogs.length > 0) {
+          const earliest = new Date(sortedLogs[0].date);
+          const latest = new Date(sortedLogs[sortedLogs.length - 1].date);
+          
+          // Format date picker values
+          this.startDatePicker = this.formatDateForPicker(earliest);
+          this.endDatePicker = this.formatDateForPicker(latest);
+          
+          // Format time picker values
+          this.startTimePicker = this.formatTimeForPicker(earliest);
+          this.endTimePicker = this.formatTimeForPicker(latest);
+          
+          // Set the actual date objects
+          this.startDate = earliest;
+          this.endDate = latest;
+          
+          // Update formatted display
+          this.startDateFormatted = this.formatDateTime(earliest);
+          this.endDateFormatted = this.formatDateTime(latest);
+        }
+        
+        // Recalculate all visualizations with the full dataset
+        this.calculateValues(this.allLogs, this.allSessions);
+      }
+    },
+    
+    initDateRange: function(logs) {
+      if (logs && logs.length > 0) {
+        // Sort logs by date
+        const sortedLogs = [...logs].sort((a, b) => a.date - b.date);
+        
+        // Set default date range from earliest to latest log
+        const earliest = new Date(sortedLogs[0].date);
+        const latest = new Date(sortedLogs[sortedLogs.length - 1].date);
+        
+        // Format date picker values
+        this.startDatePicker = this.formatDateForPicker(earliest);
+        this.endDatePicker = this.formatDateForPicker(latest);
+        
+        // Format time picker values
+        this.startTimePicker = this.formatTimeForPicker(earliest);
+        this.endTimePicker = this.formatTimeForPicker(latest);
+        
+        // Set the actual date objects but don't enable filtering
+        this.startDate = earliest;
+        this.endDate = latest;
+        
+        // Update formatted display
+        this.startDateFormatted = this.formatDateTime(earliest);
+        this.endDateFormatted = this.formatDateTime(latest);
+        
+        // Make sure filtering is not enabled on initial load
+        this.isFiltered = false;
+      }
+    },
+    
+    formatDateForPicker: function(date) {
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    },
+    
+    formatTimeForPicker: function(date) {
+      return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    },
+    applyPresetRange: function(preset) {
+      this.activePreset = preset;
+      
+      let start = new Date();
+      let end = new Date();
+      
+      switch(preset) {
+        case 'today':
+          // Start of today
+          start.setHours(0, 0, 0, 0);
+          break;
+          
+        case 'yesterday':
+          // Start of yesterday
+          start.setDate(start.getDate() - 1);
+          start.setHours(0, 0, 0, 0);
+          // End of yesterday
+          end.setDate(end.getDate() - 1);
+          end.setHours(23, 59, 59, 999);
+          break;
+          
+        case 'last7days':
+          // 7 days ago
+          start.setDate(start.getDate() - 7);
+          start.setHours(0, 0, 0, 0);
+          break;
+          
+        case 'last30days':
+          // 30 days ago
+          start.setDate(start.getDate() - 30);
+          start.setHours(0, 0, 0, 0);
+          break;
+          
+        case 'thisMonth':
+          // Start of this month
+          start.setDate(1);
+          start.setHours(0, 0, 0, 0);
+          break;
+          
+        case 'lastMonth':
+          // Start of last month
+          start.setMonth(start.getMonth() - 1);
+          start.setDate(1);
+          start.setHours(0, 0, 0, 0);
+          // End of last month
+          end.setDate(0); // Last day of previous month
+          end.setHours(23, 59, 59, 999);
+          break;
+      }
+      
+      // Update date pickers
+      this.startDatePicker = this.formatDateForPicker(start);
+      this.endDatePicker = this.formatDateForPicker(end);
+      
+      // Update time pickers
+      this.startTimePicker = this.formatTimeForPicker(start);
+      this.endTimePicker = this.formatTimeForPicker(end);
+      
+      // Set actual date objects
+      this.startDate = start;
+      this.endDate = end;
+      
+      // Update formatted display
+      this.startDateFormatted = this.formatDateTime(start);
+      this.endDateFormatted = this.formatDateTime(end);
+      
+      // Apply the filter
+      this.applyTimeFilter();
     },
   },
 };
