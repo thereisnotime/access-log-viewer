@@ -55,6 +55,7 @@ Browse agents:
 - [ ] Add additional file import for IP data (ex. ASN, Country, City, etc. for more details).
 - [ ] Add proper data validators on import.
 - [ ] Improve memory management with a global cache for the full data instead cloning it.
+- [ ] Update Node and all packages to the latest version.
 - [ ] Add support for Traefik/Caddy/Envoy/Squid/HAProxy.
 
 ## Features
