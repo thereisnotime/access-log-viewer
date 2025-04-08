@@ -7,6 +7,18 @@
       </div>
 
       <v-spacer></v-spacer>
+
+      <v-select
+        v-model="timezone"
+        :items="timezones"
+        label="Timezone"
+        dense
+        style="max-width: 200px;"
+        class="mr-4 mt-5"
+        hide-details
+        color="white"
+        background-color="rgba(255,255,255,0.1)"
+      ></v-select>
       
       <v-btn icon @click="toggleTheme">
         <v-icon>{{ theme === 'dark' ? 'mdi-weather-sunny' : 'mdi-weather-night' }}</v-icon>
@@ -24,7 +36,8 @@
               @dragover.prevent="dropHovering = true"
               @dragleave="dropHovering = false"
             >
-              Drag one or more access.log files here.
+              <v-icon x-large color="grey lighten-1" class="mb-3">mdi-upload-outline</v-icon>
+              <div>Drag one or more access.log files here.</div>
 
               <br /><br />
 
@@ -268,7 +281,6 @@
                     <div>Most Used Browsers</div>
                   </v-tab>
                   <v-tab>
-                    <v-icon left>mdi-file-download</v-icon>
                     <div>Largest Transfers</div>
                   </v-tab>
                   <v-tabs-slider color="primary"></v-tabs-slider>
@@ -432,6 +444,9 @@
                               {{ item.statusCode }}
                             </span>
                           </template>
+                          <template v-slot:item.transfer="{ item }">
+                            {{ prettyBytes(item.transfer) }}
+                          </template>
                           <template v-slot:item.date="{ item }">
                             {{ formatDate(new Date(item.date)) }}
                           </template>
@@ -448,8 +463,7 @@
               
               <!-- Placeholder when no data loaded -->
               <v-card-text v-else class="text-center pa-8">
-                <v-icon x-large color="grey lighten-1">mdi-upload-outline</v-icon>
-                <h3 class="mt-4 grey--text text--darken-1">Upload log files to view security analysis</h3>
+                <div class="grey--text mt-2">Upload log files to view security analysis</div>
                 <p class="grey--text">Drag and drop or browse for your access log files above</p>
               </v-card-text>
             </v-card>
@@ -459,9 +473,9 @@
         <v-row>
           <v-col cols="12" lg="6">
             <v-card height="100%">
-              <v-card-title>
+              <v-card-title class="d-flex align-center">
                 <v-icon left color="white">mdi-chart-bar</v-icon>
-                Summary
+                <span>Summary</span>
               </v-card-title>
               <v-tabs
                 v-model="tab"
@@ -1036,11 +1050,7 @@
                     }}</span>
                   </template>
                   <template v-slot:item.date="{ item }">
-                    {{
-                      item.date.toLocaleDateString() +
-                      "&nbsp;" +
-                      item.date.toLocaleTimeString()
-                    }}
+                    {{ formatDate(new Date(item.date)) }}
                   </template>
                 </v-data-table>
               </v-card-text>
@@ -1053,6 +1063,21 @@
           </v-col>
         </v-row>
       </v-container>
+
+      <v-btn
+        v-show="showScrollTop"
+        fab
+        fixed
+        bottom
+        right
+        small
+        color="primary"
+        @click="scrollToTop"
+        class="mb-12 mr-4"
+        style="opacity: 0.8;"
+      >
+        <v-icon>mdi-arrow-up</v-icon>
+      </v-btn>
     </v-main>
     <v-footer padless dark>
       <v-card flat tile width="100%" class="primary lighten-1 text-center">
@@ -1250,6 +1275,10 @@
   flex-direction: column;
   padding-bottom: 0; /* Remove bottom padding */
   margin-bottom: 30px; /* Add bottom margin instead */
+}
+/* Add space between card title and tabs */
+.v-card__title + .v-tabs {
+  margin-top: 15px;
 }
 /* Override the v-tabs-slider color */
 #tabs .v-tabs-slider {
@@ -1460,6 +1489,19 @@ export default {
     browserDetailsDialog: false,
     selectedBrowserDetails: null,
     browserUserAgents: [],
+    timezone: 'UTC',
+    timezones: [
+      { text: 'UTC/GMT', value: 'UTC' },
+      { text: 'Eastern Time (EST/EDT)', value: 'America/New_York' },
+      { text: 'Central Time (CST/CDT)', value: 'America/Chicago' },
+      { text: 'Mountain Time (MST/MDT)', value: 'America/Denver' },
+      { text: 'Pacific Time (PST/PDT)', value: 'America/Los_Angeles' },
+      { text: 'London (GMT/BST)', value: 'Europe/London' },
+      { text: 'Paris (CET/CEST)', value: 'Europe/Paris' },
+      { text: 'Tokyo (JST)', value: 'Asia/Tokyo' },
+      { text: 'Sydney (AEST/AEDT)', value: 'Australia/Sydney' }
+    ],
+    showScrollTop: false,
   }),
   computed: {
     filteredLogDetails() {
@@ -1627,10 +1669,10 @@ export default {
       this.files.push(file);
 
       try {
-        file.parsed = await fetch("sample.access.log.gz")
-          .then(r => r.blob())
-          .then((l) => this.parseLog(l, file));
-        this.calculateValues();
+      file.parsed = await fetch("sample.access.log.gz")
+        .then(r => r.blob())
+        .then((l) => this.parseLog(l, file));
+      this.calculateValues();
       } catch (error) {
         console.error("Error loading sample file:", error);
       }
@@ -1645,15 +1687,15 @@ export default {
         sessions = filteredSessions;
       } else {
         // Otherwise collect from all files
-        for (let i = 0; i < this.files.length; i++) {
-          if (this.files[i].parsed) {
-            logs = logs.concat(this.files[i].parsed.logs);
-            sessions = sessions.concat(this.files[i].parsed.sessions);
-          }
+      for (let i = 0; i < this.files.length; i++) {
+        if (this.files[i].parsed) {
+          logs = logs.concat(this.files[i].parsed.logs);
+          sessions = sessions.concat(this.files[i].parsed.sessions);
         }
-        logs.sort((a, b) => b.date - a.date);
-        sessions.sort((a, b) => b.date - a.date);
-        
+      }
+      logs.sort((a, b) => b.date - a.date);
+      sessions.sort((a, b) => b.date - a.date);
+
         // Store the complete dataset for filtering
         this.allLogs = Object.freeze([...logs]);
         this.allSessions = Object.freeze([...sessions]);
@@ -1959,14 +2001,14 @@ export default {
       for (let country in countryCounter) {
         // Skip invalid or missing country codes
         if (country && country.length === 2) {
-          chartDataMap.push([country, countryCounter[country]]);
-        }
+        chartDataMap.push([country, countryCounter[country]]);
+      }
       }
       
       // Sort by session count (after header row)
       if (chartDataMap.length > 1) {
         const header = chartDataMap.shift();
-        chartDataMap.sort((a, b) => b[1] - a[1]);
+      chartDataMap.sort((a, b) => b[1] - a[1]);
         chartDataMap.unshift(header);
       }
       
@@ -2125,7 +2167,9 @@ export default {
       this.leastUsedBrowsers = leastUsedBrowsers.slice(0, 20);
 
       // Process largest transfers (by size)
-      this.largestTransfers = this.logs
+      // Make sure transfer value exists before sorting
+      this.largestTransfers = logs
+        .filter(log => typeof log.transfer === 'number' && log.transfer > 0)
         .slice()
         .sort((a, b) => b.transfer - a.transfer)
         .slice(0, 20);
@@ -2150,7 +2194,20 @@ export default {
     
     formatDateTime: function(date) {
       if (!date) return '';
-      return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+      try {
+        return date.toLocaleString('en-US', { 
+          timeZone: this.timezone,
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric',
+          hour: '2-digit', 
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      } catch (e) {
+        console.error("Error formatting date with timezone:", e);
+        return date.toLocaleString();
+      }
     },
     
     applyTimeFilter: function() {
@@ -2683,6 +2740,66 @@ export default {
     },
     clearSearchFilter: function() {
       this.search = '';
+    },
+    refreshData: function() {
+      // Reset filter state if applicable
+      if (this.isFiltered) {
+        this.resetTimeFilter();
+      } else if (this.allLogs && this.allLogs.length > 0) {
+        // Force recalculation of all values
+        this.calculateValues(this.allLogs, this.allSessions);
+        
+        // Trigger UI update
+        this.$nextTick(() => {
+          const message = `Data refreshed: ${this.numberOfRequests} requests, ${this.numberOfSessions} sessions`;
+          alert(message);
+        });
+      }
+    },
+    scrollToTop: function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    handleScroll() {
+      // Show scroll-to-top button when scrolled down more than 300px
+      this.showScrollTop = window.scrollY > 300;
+    },
+    formatDate: function(date) {
+      if (!date) return '';
+      try {
+        return date.toLocaleString('en-US', { 
+          timeZone: this.timezone,
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric',
+          hour: '2-digit', 
+          minute: '2-digit'
+        });
+      } catch (e) {
+        console.error("Error formatting date with timezone:", e);
+        return date.toLocaleString();
+      }
+    }
+  },
+  mounted() {
+    // Add scroll listener for scroll-to-top button
+    window.addEventListener('scroll', this.handleScroll);
+  },
+  beforeDestroy() {
+    // Remove scroll listener when component is destroyed
+    window.removeEventListener('scroll', this.handleScroll);
+  },
+  watch: {
+    timezone() {
+      // When timezone changes, update all date displays
+      this.$forceUpdate();
+      
+      // Update formatted dates
+      if (this.startDate) {
+        this.startDateFormatted = this.formatDateTime(this.startDate);
+      }
+      if (this.endDate) {
+        this.endDateFormatted = this.formatDateTime(this.endDate);
+      }
     }
   },
 };

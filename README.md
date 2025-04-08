@@ -61,6 +61,9 @@ Browse agents:
 - [ ] Add support for Traefik/Caddy/Envoy/Squid/HAProxy.
 - [ ] Add statistics panel about the input data.
 - [ ] Add a pipeline on schedule to auto-update GeoIP data.
+- [ ] Add context search for each object type.
+- [ ] Add option to pipe log files from the terminal to the app.
+- [ ] Maybe make it mobile friendly.
 
 ## Features
 
