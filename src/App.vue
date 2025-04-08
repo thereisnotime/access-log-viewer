@@ -76,8 +76,8 @@
                   <div class="text-h6">{{ numberOfRequests }}</div>
                 </v-tab>
                 <v-tab class="text-capitalize">
-                  <div>Transfere</div>
-                  <div class="text-h6">{{ transfere }}</div>
+                  <div>Transfer</div>
+                  <div class="text-h6">{{ transfer }}</div>
                 </v-tab>
               </v-tabs>
               <v-tabs-items v-model="tab">
@@ -166,7 +166,7 @@
                     <v-card-text>
                       <GChart
                         type="LineChart"
-                        :data="chartDataTransfere"
+                        :data="chartDataTransfer"
                         :options="{
                           legend: 'none',
                           chartArea: { width: '90%', height: '80%' },
@@ -212,8 +212,11 @@
                 <GChart
                   type="GeoChart"
                   class="google-geo-chart"
+                  :settings="{ packages: ['geochart'] }"
                   :data="chartDataMap"
                   :options="{
+                    legend: 'none',
+                    datalessRegionColor: $vuetify.theme.dark ? '#333' : '#f5f5f5',
                     colorAxis: { colors: $vuetify.theme.dark ? ['#214478', '#3d78db'] : ['#a5bbf3', '#0d47a1'] },
                     backgroundColor: 'transparent'
                   }"
@@ -234,36 +237,38 @@
                       <tr>
                         <th class="text-left">IP Address</th>
                         <th class="text-left">Country</th>
+                        <th class="text-left">Network</th>
                         <th class="text-left">Browser</th>
                         <th class="text-right">Requests</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr v-for="(item, i) in mostIPs" :key="i">
-                        <td>{{ item.ip }}</td>
-                        <td>
+                        <td class="text-left">{{ item.ip || '-' }}</td>
+                        <td class="text-left">
                           <img
-                            v-if="item.country"
+                            v-if="item.country && item.country.length === 2"
                             width="16" 
                             height="16"
                             :src="`https://flagcdn.com/16x12/${item.country.toLowerCase()}.png`"
                             :alt="item.country"
                             class="mr-1"
                           />
-                          {{ item.country }}
+                          {{ item.country || 'Unknown' }}
                         </td>
-                        <td>
+                        <td class="text-left">{{ item.network || 'Unknown' }}</td>
+                        <td class="text-left">
                           <img
-                            v-if="browserLogos[item.browser]"
+                            v-if="item.browser && browserLogos[item.browser]"
                             :src="browserLogos[item.browser]"
                             :alt="item.browser"
                             width="16"
                             height="16"
                             class="mr-1"
                           />
-                          {{ item.browser }}
+                          {{ item.browser || 'Unknown' }}
                         </td>
-                        <td class="text-right">{{ item.hits }}</td>
+                        <td class="text-right">{{ item.hits || 0 }}</td>
                       </tr>
                     </tbody>
                   </template>
@@ -288,16 +293,16 @@
                       <tr v-for="(item, i) in mostBrowsers" :key="i">
                         <td>
                           <img
-                            v-if="browserLogos[item.browser]"
+                            v-if="item.browser && browserLogos[item.browser]"
                             :src="browserLogos[item.browser]"
                             :alt="item.browser"
                             width="16"
                             height="16"
                             class="mr-1"
                           />
-                          {{ item.browser }}
+                          {{ item.browser || 'Unknown' }}
                         </td>
-                        <td class="text-right">{{ item.hits }}</td>
+                        <td class="text-right">{{ item.hits || 0 }}</td>
                       </tr>
                     </tbody>
                   </template>
@@ -319,8 +324,8 @@
                   justify-content: space-around;
                 "
               >
-                <div style="display: flex; justify-content: center">
-                  <div style="width: 80px; text-align: center">
+                <div style="display: flex; justify-content: center; width: 100%">
+                  <div style="width: 120px; text-align: center">
                     <icon-desktop
                       height="32"
                       width="32"
@@ -328,12 +333,12 @@
                     /><br />
                     Desktop
                   </div>
-                  <div class="text-h5" style="width: 80px">
+                  <div class="text-h5" style="width: 120px; text-align: center">
                     {{ devices.desktop.percentage.toFixed(1) }} %
                   </div>
                 </div>
-                <div style="display: flex; justify-content: center">
-                  <div style="width: 80px; text-align: center">
+                <div style="display: flex; justify-content: center; width: 100%">
+                  <div style="width: 120px; text-align: center">
                     <icon-mobile
                       height="32"
                       width="32"
@@ -341,12 +346,12 @@
                     /><br />
                     Mobile
                   </div>
-                  <div class="text-h5" style="width: 80px">
+                  <div class="text-h5" style="width: 120px; text-align: center">
                     {{ devices.mobile.percentage.toFixed(1) }} %
                   </div>
                 </div>
-                <div style="display: flex; justify-content: center">
-                  <div style="width: 80px; text-align: center">
+                <div style="display: flex; justify-content: center; width: 100%">
+                  <div style="width: 120px; text-align: center">
                     <icon-tablet
                       height="32"
                       width="32"
@@ -354,7 +359,7 @@
                     /><br />
                     Tablet
                   </div>
-                  <div class="text-h5" style="width: 80px">
+                  <div class="text-h5" style="width: 120px; text-align: center">
                     {{ devices.tablet.percentage.toFixed(1) }} %
                   </div>
                 </div>
@@ -391,12 +396,12 @@
                         :key="item.url"
                       >
                         <td>
-                          <span :title="item.url">{{
-                            item.url.substring(0, 50) +
-                            (item.url.length > 50 ? "..." : "")
+                          <span :title="item.url || ''">{{
+                            (item.url || '/').substring(0, 50) +
+                            ((item.url && item.url.length > 50) ? "..." : "")
                           }}</span>
                         </td>
-                        <td>{{ item.hits }}</td>
+                        <td>{{ item.hits || 0 }}</td>
                       </tr>
                     </tbody>
                   </template>
@@ -495,8 +500,8 @@
                     'items-per-page-options': [10, 20, 30],
                   }"
                 >
-                  <template v-slot:item.transfere="{ item }">
-                    {{ prettyBytes(item.transfere) }}
+                  <template v-slot:item.transfer="{ item }">
+                    {{ prettyBytes(item.transfer) }}
                   </template>
                   <template v-slot:item.url="{ item }">
                     <span :title="item.url">{{
@@ -617,7 +622,7 @@ export default {
     logs: [],
     numberOfRequests: 0,
     numberOfSessions: 0,
-    transfere: 0,
+    transfer: 0,
     assetSwitch: 0,
     browserLogos: {
       Firefox: require("./assets/browser-logos/firefox_16x16.png"),
@@ -635,7 +640,7 @@ export default {
       mobile: { percentage: 0 },
     },
     mostIPs: [
-      { ip: "192.168.1.1", hits: 0, country: "US", browser: "Chrome" },
+      { ip: "192.168.1.1", hits: 0, country: "US", browser: "Chrome", network: "Private Network" },
     ],
     mostStatusCodes: [
       { statusCode: 200, hits: 0 },
@@ -662,7 +667,7 @@ export default {
       { text: "Method", value: "method" },
       { text: "Page", value: "url" },
       { text: "Status", value: "statusCode" },
-      { text: "Transfere", value: "transfere", filterable: false },
+      { text: "Transfer", value: "transfer", filterable: false },
     ],
     chartDataSessions: [
       ["Year", "Sessions"],
@@ -674,7 +679,7 @@ export default {
       ["2021", 0],
       ["2022", 0],
     ],
-    chartDataTransfere: [
+    chartDataTransfer: [
       ["Year", "Bytes"],
       ["2021", 0],
       ["2022", 0],
@@ -683,6 +688,65 @@ export default {
   }),
   methods: {
     prettyBytes: prettyBytes,
+    getNetworkInfo: function(ip) {
+      // Handle special cases
+      if (!ip || ip === '-') return 'Unknown';
+      
+      // Check for private IP ranges
+      if (ip.startsWith('10.') || 
+          ip.startsWith('172.16.') || 
+          ip.startsWith('172.17.') || 
+          ip.startsWith('172.18.') || 
+          ip.startsWith('172.19.') || 
+          ip.startsWith('172.2') || 
+          ip.startsWith('172.30.') || 
+          ip.startsWith('172.31.') || 
+          ip.startsWith('192.168.')) {
+        return 'Private Network';
+      }
+      
+      // Check for localhost
+      if (ip === '127.0.0.1' || ip === '::1') {
+        return 'Localhost';
+      }
+      
+      // For IPv6 addresses
+      if (ip.includes(':')) {
+        if (ip.startsWith('fc00:') || ip.startsWith('fd00:')) {
+          return 'Private IPv6';
+        }
+        if (ip.startsWith('2001:')) {
+          return 'Global IPv6';
+        }
+        if (ip.startsWith('fe80:')) {
+          return 'Link-local IPv6';
+        }
+      }
+      
+      // For common ISPs and datacenters based on IP ranges
+      if (ip.startsWith('8.8.') || ip.startsWith('8.8.4.') || ip.startsWith('8.8.8.')) {
+        return 'Google DNS';
+      }
+      if (ip.startsWith('13.32.') || ip.startsWith('13.33.') || ip.startsWith('13.35.') || 
+          ip.startsWith('52.84.') || ip.startsWith('54.192.')) {
+        return 'Amazon AWS';
+      }
+      if (ip.startsWith('104.16.') || ip.startsWith('104.17.') || ip.startsWith('104.18.')) {
+        return 'Cloudflare';
+      }
+      if (ip.startsWith('216.58.') || ip.startsWith('172.217.') || ip.startsWith('74.125.')) {
+        return 'Google';
+      }
+      if (ip.startsWith('157.240.') || ip.startsWith('31.13.')) {
+        return 'Facebook';
+      }
+      if (ip.startsWith('199.232.') || ip.startsWith('151.101.')) {
+        return 'Fastly';
+      }
+      
+      // Default fallback
+      return 'Internet';
+    },
     parseLog: async function (log, file) {
       function fakeProgress(progress, time) {
         setTimeout(function() {
@@ -772,10 +836,15 @@ export default {
       };
       this.files.push(file);
 
-      file.parsed = await fetch("sample.access.log.gz")
-        .then(r => r.blob())
-        .then((l) => this.parseLog(l, file));
-      this.calculateValues();
+      try {
+        file.parsed = await fetch("sample.access.log.gz")
+          .then(r => r.blob())
+          .then((l) => this.parseLog(l, file));
+        console.log("Sample file loaded:", file.parsed.logs.length, "logs");
+        this.calculateValues();
+      } catch (error) {
+        console.error("Error loading sample file:", error);
+      }
     },
     calculateValues: function () {
       let logs = [];
@@ -800,12 +869,13 @@ export default {
       const urlCounter = {};
       const sessionCounter = {};
       const requestCounter = {};
-      const transfereCounter = {};
+      const transferCounter = {};
       const countryCounter = {};
       const ipCounter = {};
       const ipData = {};
       const dates = {};
-      let transfere = 0;
+      let totalTransfer = 0;
+      const self = this; // Store reference to 'this'
 
       let splitTime = "hour";
       if (logs.length > 0) {
@@ -818,7 +888,12 @@ export default {
       }
 
       logs.forEach((log) => {
-        transfere += log.transfere;
+        // Map transfere to transfer for consistency
+        if (log.transfere !== undefined && log.transfer === undefined) {
+          log.transfer = log.transfere;
+        }
+        
+        totalTransfer += log.transfer || 0;
         statusCodesCounter[log.statusCode] =
           statusCodesCounter[log.statusCode] + 1 || 1;
         if (log.url) {
@@ -834,7 +909,8 @@ export default {
             ipData[log.ipAddress] = {
               country: log.country || '',
               browser: '',
-              userAgent: log.userAgend || ''
+              userAgent: log.userAgend || '',
+              network: self.getNetworkInfo(log.ipAddress) || ''
             };
           }
         }
@@ -862,8 +938,8 @@ export default {
         }
         dates[time] = log.date;
         requestCounter[time] = requestCounter[time] + 1 || 1;
-        transfereCounter[time] =
-          transfereCounter[time] + log.transfere || log.transfere;
+        transferCounter[time] =
+          transferCounter[time] + log.transfer || log.transfer;
       });
 
       sessions.forEach((log) => {
@@ -912,7 +988,7 @@ export default {
         sessionCounter[time] = sessionCounter[time] + 1 || 1;
       });
 
-      this.transfere = prettyBytes(transfere);
+      this.transfer = prettyBytes(totalTransfer);
 
       const chartDataSessions = [];
       for (let date in sessionCounter) {
@@ -936,19 +1012,19 @@ export default {
       chartDataRequests.reverse();
       this.chartDataRequests = Object.freeze(chartDataRequests);
 
-      const chartDataTransfere = [];
-      for (let date in transfereCounter) {
-        chartDataTransfere.push([
+      const chartDataTransfer = [];
+      for (let date in transferCounter) {
+        chartDataTransfer.push([
           dates[date],
-          { v: transfereCounter[date], f: prettyBytes(transfereCounter[date]) },
+          { v: transferCounter[date], f: prettyBytes(transferCounter[date]) },
         ]);
       }
-      if (chartDataTransfere.length === 0) {
-        chartDataTransfere.push(["2022", 0]);
+      if (chartDataTransfer.length === 0) {
+        chartDataTransfer.push(["2022", 0]);
       }
-      chartDataTransfere.push(["Time", "Bytes"]);
-      chartDataTransfere.reverse();
-      this.chartDataTransfere = Object.freeze(chartDataTransfere);
+      chartDataTransfer.push(["Time", "Bytes"]);
+      chartDataTransfer.reverse();
+      this.chartDataTransfer = Object.freeze(chartDataTransfer);
 
       const chartDataMap = [];
       for (let country in countryCounter) {
@@ -1033,12 +1109,14 @@ export default {
         mostIPs.push({
           ip: ip,
           hits: ipCounter[ip],
-          country: ipData[ip] ? ipData[ip].country : '',
-          browser: ipData[ip] ? ipData[ip].browser : '',
-          userAgent: ipData[ip] ? ipData[ip].userAgent : ''
+          country: ipData[ip] && ipData[ip].country ? ipData[ip].country : '',
+          browser: ipData[ip] && ipData[ip].browser ? ipData[ip].browser : '',
+          userAgent: ipData[ip] && ipData[ip].userAgent ? ipData[ip].userAgent : '',
+          network: ipData[ip] && ipData[ip].network ? ipData[ip].network : (ip === '-' ? 'Unknown' : self.getNetworkInfo(ip))
         });
       }
       mostIPs.sort((a, b) => b.hits - a.hits);
+      console.log("Top IPs:", mostIPs.slice(0, 3)); // Debug the top 3 IPs
       this.mostIPs = mostIPs.slice(0, 10);
     },
   },
