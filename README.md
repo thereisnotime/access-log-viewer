@@ -46,8 +46,9 @@ Easily check IP addresses:
 - [ ] Add exception list (ex. health checks and liveness probes).
 - [ ] Add string filter/search in the Logs panel.
 - [ ] Make the sort on tables work on all data not only the current page.
-- [ ] Improve loading speed.
+- [ ] Improve file loading speed.
 - [ ] Add additional file import for IP data (ex. ASN, Country, City, etc. for more details).
+- [ ] Add proper data validators on import.
 
 ## Features
 

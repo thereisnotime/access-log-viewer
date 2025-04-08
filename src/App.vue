@@ -2,6 +2,7 @@
   <v-app :theme="theme">
     <v-app-bar app color="primary" dark>
       <div class="d-flex align-center">
+        <v-icon class="mr-2" large>mdi-shield-lock</v-icon>
         <h1>Security Access Log Viewer</h1>
       </div>
 
