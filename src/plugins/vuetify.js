@@ -11,10 +11,10 @@ export default new Vuetify({
         },
         themes: {
             dark: {
-                primary: '#8B0000', // Dark red
-                secondary: '#b71c1c',
-                accent: '#d05959',
-                error: '#ff5252',
+                primary: '#8B0000', // Single main red color for the entire app
+                secondary: '#8B0000', // Use same red for consistency 
+                accent: '#8B0000',  // Use same red for consistency
+                error: '#ff5252',   // Keep distinct error red for alerts only
                 info: '#2196F3',
                 success: '#4CAF50',
                 warning: '#FB8C00',
@@ -22,10 +22,10 @@ export default new Vuetify({
                 surface: '#1E1E1E',
             },
             light: {
-                primary: '#8B0000', // Dark red
-                secondary: '#b71c1c',
-                accent: '#d05959',
-                error: '#FF5252',
+                primary: '#8B0000', // Single main red color for the entire app
+                secondary: '#8B0000', // Use same red for consistency
+                accent: '#8B0000',  // Use same red for consistency
+                error: '#ff5252',   // Keep distinct error red for alerts only
                 info: '#2196F3',
                 success: '#4CAF50',
                 warning: '#FB8C00',

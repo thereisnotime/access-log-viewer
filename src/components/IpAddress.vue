@@ -68,7 +68,7 @@ export default {
 }
 .ip-wrapper:hover {
   text-decoration: underline;
-  color: var(--v-secondary-base);
+  color: #8B0000;
   background-color: rgba(139, 0, 0, 0.1);
 }
 </style> 

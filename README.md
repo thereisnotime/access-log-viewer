@@ -26,6 +26,10 @@ Browse agents:
 
 ![access log viewer apache and nginx](public/ss06.png)
 
+Search for malicious requests:
+
+![access log viewer apache and nginx](public/ss07.png)
+
 ## Table of Contents
 
 - [SALV - Security Access Log Viewer](#salv---security-access-log-viewer)

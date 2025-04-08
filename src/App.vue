@@ -39,6 +39,11 @@
               <v-icon x-large color="grey lighten-1" class="mb-3">mdi-upload-outline</v-icon>
               <div>Drag one or more access.log files here.</div>
 
+              <div class="privacy-notice mt-2">
+                <v-icon small color="error" class="mr-1">mdi-shield-lock-outline</v-icon>
+                <span>Your data is processed locally. Nothing leaves your computer.</span>
+              </div>
+
               <br /><br />
 
               <v-btn @click="$refs.files.click()">Browse Files</v-btn>
@@ -91,7 +96,7 @@
               <v-card-title class="panel-heading">
                 <v-icon left color="white">mdi-calendar-range</v-icon>
                 Time Range Filter
-                <v-chip v-if="isFiltered" color="accent" small class="ml-2">Active</v-chip>
+                <v-chip v-if="isFiltered" color="primary" small class="ml-2">Active</v-chip>
               </v-card-title>
               <v-card-text>
                 <v-row>
@@ -202,20 +207,20 @@
                   </v-col>
                   
                   <v-col cols="12" md="2" class="d-flex align-center">
-                    <v-btn color="accent" @click="applyTimeFilter">Apply Filter</v-btn>
-                    <v-btn text class="ml-2" @click="resetTimeFilter">Reset</v-btn>
+                    <v-btn color="primary" @click="applyTimeFilter">Apply Filter</v-btn>
+                    <v-btn small color="primary" @click="resetTimeFilter" class="ml-2">Reset</v-btn>
                   </v-col>
                 </v-row>
                 <v-row>
                   <v-col cols="12">
                     <div class="d-flex flex-wrap">
                       <span class="mr-2 mt-2">Presets:</span>
-                      <v-btn small :outlined="activePreset === 'today'" class="mr-2 mt-2" :color="activePreset === 'today' ? 'accent' : ''" @click="applyPresetRange('today')">Today</v-btn>
-                      <v-btn small :outlined="activePreset === 'yesterday'" class="mr-2 mt-2" :color="activePreset === 'yesterday' ? 'accent' : ''" @click="applyPresetRange('yesterday')">Yesterday</v-btn>
-                      <v-btn small :outlined="activePreset === 'last7days'" class="mr-2 mt-2" :color="activePreset === 'last7days' ? 'accent' : ''" @click="applyPresetRange('last7days')">Last 7 Days</v-btn>
-                      <v-btn small :outlined="activePreset === 'last30days'" class="mr-2 mt-2" :color="activePreset === 'last30days' ? 'accent' : ''" @click="applyPresetRange('last30days')">Last 30 Days</v-btn>
-                      <v-btn small :outlined="activePreset === 'thisMonth'" class="mr-2 mt-2" :color="activePreset === 'thisMonth' ? 'accent' : ''" @click="applyPresetRange('thisMonth')">This Month</v-btn>
-                      <v-btn small :outlined="activePreset === 'lastMonth'" class="mr-2 mt-2" :color="activePreset === 'lastMonth' ? 'accent' : ''" @click="applyPresetRange('lastMonth')">Last Month</v-btn>
+                      <v-btn small :outlined="activePreset === 'today'" class="mr-2 mt-2" :color="activePreset === 'today' ? 'primary' : ''" @click="applyPresetRange('today')">Today</v-btn>
+                      <v-btn small :outlined="activePreset === 'yesterday'" class="mr-2 mt-2" :color="activePreset === 'yesterday' ? 'primary' : ''" @click="applyPresetRange('yesterday')">Yesterday</v-btn>
+                      <v-btn small :outlined="activePreset === 'last7days'" class="mr-2 mt-2" :color="activePreset === 'last7days' ? 'primary' : ''" @click="applyPresetRange('last7days')">Last 7 Days</v-btn>
+                      <v-btn small :outlined="activePreset === 'last30days'" class="mr-2 mt-2" :color="activePreset === 'last30days' ? 'primary' : ''" @click="applyPresetRange('last30days')">Last 30 Days</v-btn>
+                      <v-btn small :outlined="activePreset === 'thisMonth'" class="mr-2 mt-2" :color="activePreset === 'thisMonth' ? 'primary' : ''" @click="applyPresetRange('thisMonth')">This Month</v-btn>
+                      <v-btn small :outlined="activePreset === 'lastMonth'" class="mr-2 mt-2" :color="activePreset === 'lastMonth' ? 'primary' : ''" @click="applyPresetRange('lastMonth')">Last Month</v-btn>
                     </div>
                   </v-col>
                 </v-row>
@@ -231,10 +236,10 @@
               type="info"
               dense
               outlined
-              color="accent"
+              color="primary"
             >
               Showing filtered data from {{ startDateFormatted || 'earliest record' }} to {{ endDateFormatted || 'latest record' }}. 
-              <v-btn small color="accent" @click="resetTimeFilter" class="ml-2">Reset Filter</v-btn>
+              <v-btn small color="primary" @click="resetTimeFilter" class="ml-2">Reset Filter</v-btn>
             </v-alert>
             <v-alert
               v-if="isFiltered && logs.length === 0"
@@ -243,7 +248,7 @@
               outlined
             >
               No data found in the selected time range. Please adjust your filter or 
-              <v-btn small color="accent" @click="resetTimeFilter" class="ml-2">Reset Filter</v-btn>
+              <v-btn small color="primary" @click="resetTimeFilter" class="ml-2">Reset Filter</v-btn>
             </v-alert>
             <v-alert
               v-if="!isFiltered && allLogs && allLogs.length > 0"
@@ -578,15 +583,16 @@
               </v-tabs>
               <v-tabs-items v-model="tab">
                 <v-tab-item :transition="false">
-                  <v-card flat v-if="tab === 0">
-                    <v-card-text v-if="logs.length > 0">
+                  <v-card flat>
+                    <v-card-text v-if="logs.length > 0" class="chart-container">
                       <GChart
+                        ref="sessionChart"
                         type="LineChart"
                         :data="chartDataSessions"
                         :options="{
                           legend: 'none',
                           chartArea: { width: '90%', height: '80%' },
-                          colors: $vuetify.theme.dark ? ['#a71d31'] : ['#8B0000'],
+                          colors: $vuetify.theme.dark ? ['#8B0000'] : ['#8B0000'],
                           backgroundColor: 'transparent',
                           pointSize: 6,
                           pointShape: 'circle',
@@ -594,6 +600,8 @@
                           curveType: 'function',
                           interpolateNulls: true,
                           tooltip: { isHtml: true },
+                          width: '100%',
+                          height: 350,
                           explorer: {
                             actions: ['dragToZoom', 'rightClickToReset'],
                             axis: 'horizontal',
@@ -636,15 +644,16 @@
                   </v-card>
                 </v-tab-item>
                 <v-tab-item :transition="false">
-                  <v-card flat v-if="tab === 1">
-                    <v-card-text v-if="logs.length > 0">
+                  <v-card flat>
+                    <v-card-text v-if="logs.length > 0" class="chart-container">
                       <GChart
+                        ref="requestChart"
                         type="LineChart"
                         :data="chartDataRequests"
                         :options="{
                           legend: 'none',
                           chartArea: { width: '90%', height: '80%' },
-                          colors: $vuetify.theme.dark ? ['#a71d31'] : ['#8B0000'],
+                          colors: $vuetify.theme.dark ? ['#8B0000'] : ['#8B0000'],
                           backgroundColor: 'transparent',
                           pointSize: 6,
                           pointShape: 'circle',
@@ -652,6 +661,8 @@
                           curveType: 'function',
                           interpolateNulls: true,
                           tooltip: { isHtml: true },
+                          width: '100%',
+                          height: 350,
                           explorer: {
                             actions: ['dragToZoom', 'rightClickToReset'],
                             axis: 'horizontal',
@@ -694,15 +705,16 @@
                   </v-card>
                 </v-tab-item>
                 <v-tab-item :transition="false">
-                  <v-card flat v-if="tab === 2">
-                    <v-card-text v-if="logs.length > 0">
+                  <v-card flat>
+                    <v-card-text v-if="logs.length > 0" class="chart-container">
                       <GChart
+                        ref="transferChart"
                         type="LineChart"
                         :data="chartDataTransfer"
                         :options="{
                           legend: 'none',
                           chartArea: { width: '90%', height: '80%' },
-                          colors: $vuetify.theme.dark ? ['#a71d31'] : ['#8B0000'],
+                          colors: $vuetify.theme.dark ? ['#8B0000'] : ['#8B0000'],
                           backgroundColor: 'transparent',
                           pointSize: 6,
                           pointShape: 'circle',
@@ -710,6 +722,8 @@
                           curveType: 'function',
                           interpolateNulls: true,
                           tooltip: { isHtml: true },
+                          width: '100%',
+                          height: 350,
                           explorer: {
                             actions: ['dragToZoom', 'rightClickToReset'],
                             axis: 'horizontal',
@@ -752,7 +766,7 @@
                   </v-card>
                 </v-tab-item>
                 <v-tab-item :transition="false">
-                  <v-card flat v-if="tab === 3">
+                  <v-card flat>
                     <v-card-text v-if="logs.length > 0">
                       <v-simple-table dense>
                         <template v-slot:default>
@@ -802,7 +816,7 @@
                     <v-card-text v-else class="text-center pa-5">
                       <v-icon large color="grey">mdi-table-off</v-icon>
                       <div class="grey--text mt-2">No log entries found for the selected time range</div>
-                      <v-btn small color="secondary" @click="resetTimeFilter" class="mt-4">Reset Filter</v-btn>
+                      <v-btn small color="primary" @click="resetTimeFilter" class="mt-4">Reset Filter</v-btn>
                     </v-card-text>
                   </v-card>
                 </v-tab-item>
@@ -1156,7 +1170,7 @@
               <v-card-text v-else class="text-center pa-5">
                 <v-icon large color="grey">mdi-table-off</v-icon>
                 <div class="grey--text mt-2">No log entries found for the selected time range</div>
-                <v-btn small color="secondary" @click="resetTimeFilter" class="mt-4">Reset Filter</v-btn>
+                <v-btn small color="primary" @click="resetTimeFilter" class="mt-4">Reset Filter</v-btn>
               </v-card-text>
             </v-card>
           </v-col>
@@ -1179,7 +1193,7 @@
       </v-btn>
     </v-main>
     <v-footer padless dark>
-      <v-card flat tile width="100%" class="primary lighten-1 text-center">
+      <v-card flat tile width="100%" class="primary text-center">
         <v-card-text>
           <v-btn class="mx-4" icon>
             <a href="https://github.com/thereisnotime/access-log-viewer"
@@ -1194,10 +1208,18 @@
         <v-divider></v-divider>
 
         <v-card-text>
-          This product includes GeoLite2 data created by MaxMind, available from
+          This site includes GeoLite2 data created by MaxMind, available from
           <a target="_blank" href="https://www.maxmind.com" style="color: rgba(255, 255, 255, 0.7)"
             >https://www.maxmind.com</a
           >.
+        </v-card-text>
+        
+        <v-divider></v-divider>
+        
+        <v-card-text class="privacy-footer">
+          <v-icon small class="mr-2">mdi-shield-lock</v-icon>
+          <strong>Privacy Notice:</strong> SALV processes all data locally in your browser. 
+          Your log files are never uploaded to any server and all analysis happens on your device.
         </v-card-text>
       </v-card>
     </v-footer>
@@ -1344,13 +1366,16 @@
 }
 
 .success {
-  color: green;
+  color: var(--v-success-base);
+  font-weight: 500;
 }
 .warning {
-  color: orange;
+  color: var(--v-warning-base);
+  font-weight: 500;
 }
 .error {
-  color: red;
+  color: var(--v-error-base);
+  font-weight: 500;
 }
 
 .ip-address {
@@ -1410,7 +1435,7 @@
 
 /* Override the v-tabs-slider color */
 #tabs .v-tabs-slider {
-  background-color: #8B0000 !important; /* Primary dark red color */
+  background-color: var(--v-primary-base) !important;
   bottom: 0 !important; /* Reset the slider position */
 }
 
@@ -1451,17 +1476,17 @@
 
 /* Status code colors */
 .success {
-  color: #4caf50;
+  color: var(--v-success-base);
   font-weight: 500;
 }
 
 .warning {
-  color: #fb8c00;
+  color: var(--v-warning-base);
   font-weight: 500;
 }
 
 .error {
-  color: #f44336;
+  color: var(--v-error-base);
   font-weight: 500;
 }
 
@@ -1490,15 +1515,6 @@ pre {
 
 .theme--dark .v-data-table th {
   color: rgba(255, 255, 255, 0.8);
-}
-
-/* Accent color hover effects */
-.accent {
-  transition: all 0.3s ease;
-}
-
-.accent:hover {
-  filter: brightness(1.2);
 }
 
 /* Night mode toggle button effect */
@@ -1672,8 +1688,45 @@ pre {
 }
 
 .high-risk {
-  color: #ff5252;
+  color: var(--v-error-base);
   font-weight: bold;
+  background-color: rgba(255, 82, 82, 0.1); /* Light error background */
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+
+/* Remove unused accent CSS classes and replace with primary classes */
+.primary-button {
+  transition: all 0.3s ease;
+}
+
+.primary-button:hover {
+  filter: brightness(1.2);
+}
+
+/* Add CSS for the privacy notice */
+.privacy-notice {
+  background-color: rgba(255, 82, 82, 0.1);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  border-left: 3px solid var(--v-error-base);
+}
+
+/* Style the privacy notice in the footer */
+.privacy-footer {
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-container {
+  height: 350px;
+  min-height: 350px;
+  width: 100%;
 }
 </style>
 <script>
@@ -3304,6 +3357,18 @@ export default {
       
       return uniqueSuspicious;
     },
+    // Update redrawChart to handle multiple chart references
+    redrawChart() {
+      // Force layout recalculation
+      this.$nextTick(() => {
+        window.dispatchEvent(new Event('resize'));
+        
+        // If tab switching causes charts to shrink, force a redraw after a brief delay
+        setTimeout(() => {
+          window.dispatchEvent(new Event('resize'));
+        }, 100);
+      });
+    },
   },
   mounted() {
     // Add scroll listener for scroll-to-top button
@@ -3346,7 +3411,10 @@ export default {
           });
         });
       }
-    }
+    },
+    tab() {
+      this.redrawChart();
+    },
   },
 };
 </script>
