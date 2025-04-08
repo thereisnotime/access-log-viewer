@@ -483,7 +483,7 @@
         <v-row>
           <v-col cols="12" lg="6">
             <v-card height="100%">
-              <v-card-title class="d-flex align-center">
+              <v-card-title class="d-flex align-center summary-card-title">
                 <v-icon left color="white">mdi-chart-bar</v-icon>
                 <span>Summary</span>
               </v-card-title>
@@ -1289,36 +1289,59 @@
 }
 
 #tabs .v-tabs-bar {
-  height: 100px !important; /* Increase height to add more space */
-  padding-top: 0; /* Remove top padding */
+  height: auto !important;
+  padding-top: 0;
 }
+
 #tabs .v-tab {
   flex-direction: column;
-  padding-bottom: 0; /* Remove bottom padding */
-  margin-bottom: 30px; /* Add bottom margin instead */
+  margin-bottom: 0 !important;
+  height: 72px !important;
+  padding: 8px 16px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+#tabs .v-tab .v-icon {
+  margin-bottom: 8px;
+  display: block;
+}
+
+#tabs .v-tab div {
+  font-size: 14px;
+  display: block;
+  white-space: nowrap;
+}
+
 /* Add space between card title and tabs */
 .v-card__title + .v-tabs {
   margin-top: 15px;
 }
+
 /* Override the v-tabs-slider color */
 #tabs .v-tabs-slider {
   background-color: #8B0000 !important; /* Primary dark red color */
   bottom: 0 !important; /* Reset the slider position */
 }
+
 .theme--dark.v-tabs > .v-tabs-bar .v-tab.v-tab--active {
   color: #fff;
 }
+
 .theme--dark .google-geo-chart path[fill*="#_ABSTRACT_RENDERER_ID"] {
   display: none; /* white dots in dark mode visible, no clue what this renders anyway */
 }
+
 .theme--dark .google-geo-chart path:hover {
   stroke:#77a8da;
 }
+
 .theme--dark .google-visualization-tooltip path {        
   fill: #111;
   stroke: #000;
 }
+
 .theme--dark .google-visualization-tooltip text {        
   fill: #eee;
 }
@@ -1396,6 +1419,31 @@ pre {
 
 .v-btn--icon:hover {
   transform: rotate(30deg);
+}
+
+/* Fix summary panel tabs overlap */
+.summary-card-title {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+}
+
+.theme--dark .summary-card-title {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+#tabs .v-tabs-bar {
+  height: auto !important;
+}
+
+#tabs .v-tab {
+  height: 72px !important;
+  padding: 8px 16px !important;
+}
+
+/* Remove existing styles that might be conflicting */
+#tabs .v-tab {
+  margin-bottom: 0 !important;
 }
 </style>
 <script>

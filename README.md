@@ -63,6 +63,7 @@ Browse agents:
 - [ ] Add a pipeline on schedule to auto-update GeoIP data.
 - [ ] Add context search for each object type.
 - [ ] Add option to pipe log files from the terminal to the app.
+- [ ] Break down App.vue to smaller components.
 - [ ] Maybe make it mobile friendly.
 
 ## Features
