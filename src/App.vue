@@ -240,6 +240,180 @@
           </v-col>
         </v-row>
 
+        <!-- Security Analysis Panel -->
+        <v-row>
+          <v-col cols="12">
+            <v-card>
+              <v-card-title>
+                <v-icon left color="accent">mdi-shield-alert</v-icon>
+                Security Analysis
+              </v-card-title>
+              
+              <div v-if="allLogs && allLogs.length > 0">
+                <v-tabs
+                  v-model="securityTab"
+                  background-color="transparent"
+                  grow
+                >
+                  <v-tabs-slider color="accent"></v-tabs-slider>
+                  <v-tab>
+                    <v-icon left>mdi-alert-circle</v-icon>
+                    Top IPs with Errors
+                  </v-tab>
+                  <v-tab>
+                    <v-icon left>mdi-browser-outline</v-icon>
+                    Least Used Browsers
+                  </v-tab>
+                  <v-tab>
+                    <v-icon left>mdi-browser</v-icon>
+                    Most Used Browsers
+                  </v-tab>
+                </v-tabs>
+                <v-tabs-items v-model="securityTab">
+                  <!-- Tab 1: Top 20 IPs by 4xx and 5xx errors -->
+                  <v-tab-item>
+                    <v-card flat>
+                      <v-card-text v-if="errorIPs.length > 0">
+                        <v-data-table
+                          :headers="[
+                            { text: 'IP Address', value: 'ip' },
+                            { text: 'Error Count', value: 'errorCount' },
+                            { text: 'Country', value: 'country' },
+                            { text: 'Browser', value: 'browser' },
+                            { text: 'Network', value: 'network' }
+                          ]"
+                          :items="errorIPs"
+                          dense
+                          :items-per-page="10"
+                          :footer-props="{
+                            'items-per-page-options': [10, 20, 30, 50, 100]
+                          }"
+                          class="elevation-1"
+                        >
+                          <template v-slot:item.ip="{ item }">
+                            <ip-address :ip="item.ip" />
+                          </template>
+                          <template v-slot:item.country="{ item }">
+                            <span v-if="item.country">
+                              <img 
+                                v-if="item.country && item.country.length === 2"
+                                width="16" 
+                                height="12"
+                                :src="`https://flagcdn.com/16x12/${item.country.toLowerCase()}.png`"
+                                :alt="item.country"
+                                class="mr-1"
+                              />
+                              {{ item.country }}
+                            </span>
+                          </template>
+                          <template v-slot:item.browser="{ item }">
+                            <img
+                              v-if="browserLogos[item.browser]"
+                              :src="browserLogos[item.browser]"
+                              height="16"
+                              class="mr-1"
+                            />
+                            {{ item.browser }}
+                          </template>
+                        </v-data-table>
+                      </v-card-text>
+                      <v-card-text v-else class="text-center pa-5">
+                        <v-icon large color="grey">mdi-alert-circle-outline</v-icon>
+                        <div class="grey--text mt-2">No error data available for the selected time range</div>
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                  <!-- Tab 2: Least Used Browser Agents -->
+                  <v-tab-item>
+                    <v-card flat>
+                      <v-card-text v-if="leastUsedBrowsers.length > 0">
+                        <v-data-table
+                          :headers="[
+                            { text: 'Browser', value: 'browser' },
+                            { text: 'Sessions', value: 'hits' },
+                            { text: 'Percentage', value: 'percentage' }
+                          ]"
+                          :items="leastUsedBrowsers"
+                          dense
+                          :items-per-page="10"
+                          :footer-props="{
+                            'items-per-page-options': [10, 20, 30, 50, 100]
+                          }"
+                          class="elevation-1"
+                          @click:row="showBrowserDetails"
+                        >
+                          <template v-slot:item.browser="{ item }">
+                            <img
+                              v-if="browserLogos[item.browser]"
+                              :src="browserLogos[item.browser]"
+                              height="16"
+                              class="mr-1"
+                            />
+                            {{ item.browser }}
+                          </template>
+                          <template v-slot:item.percentage="{ item }">
+                            {{ item.percentage.toFixed(2) }}%
+                          </template>
+                        </v-data-table>
+                      </v-card-text>
+                      <v-card-text v-else class="text-center pa-5">
+                        <v-icon large color="grey">mdi-browser-outline</v-icon>
+                        <div class="grey--text mt-2">No browser data available for the selected time range</div>
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                  <!-- Tab 3: Most Used Browser Agents -->
+                  <v-tab-item>
+                    <v-card flat>
+                      <v-card-text v-if="mostBrowsers.length > 0">
+                        <v-data-table
+                          :headers="[
+                            { text: 'Browser', value: 'browser' },
+                            { text: 'Sessions', value: 'hits' },
+                            { text: 'Percentage', value: 'percentage' }
+                          ]"
+                          :items="mostBrowsers"
+                          dense
+                          :items-per-page="10"
+                          :footer-props="{
+                            'items-per-page-options': [10, 20, 30, 50, 100]
+                          }"
+                          class="elevation-1"
+                          @click:row="showBrowserDetails"
+                        >
+                          <template v-slot:item.browser="{ item }">
+                            <img
+                              v-if="browserLogos[item.browser]"
+                              :src="browserLogos[item.browser]"
+                              height="16"
+                              class="mr-1"
+                            />
+                            {{ item.browser }}
+                          </template>
+                          <template v-slot:item.percentage="{ item }">
+                            {{ item.percentage.toFixed(2) }}%
+                          </template>
+                        </v-data-table>
+                      </v-card-text>
+                      <v-card-text v-else class="text-center pa-5">
+                        <v-icon large color="grey">mdi-browser</v-icon>
+                        <div class="grey--text mt-2">No browser data available for the selected time range</div>
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                </v-tabs-items>
+              </div>
+              
+              <!-- Placeholder when no data loaded -->
+              <v-card-text v-else class="text-center pa-8">
+                <v-icon x-large color="grey lighten-1">mdi-upload-outline</v-icon>
+                <h3 class="mt-4 grey--text text--darken-1">Upload log files to view security analysis</h3>
+                <p class="grey--text">Drag and drop or browse for your access log files above</p>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+
         <v-row>
           <v-col cols="12" lg="6">
             <v-card height="100%">
@@ -846,41 +1020,119 @@
           </v-simple-table>
           
           <div class="mt-4" v-if="selectedLogDetails && selectedLogDetails.raw">
-            <v-divider class="mb-3"></v-divider>
-            <div class="subtitle-1 mb-2 accent--text">Raw Log Entry:</div>
-            <v-card outlined class="pa-2 grey lighten-4 black--text" :class="{'grey darken-3 white--text': $vuetify.theme.dark}">
-              <pre style="white-space: pre-wrap; word-break: break-all;">{{ selectedLogDetails.raw }}</pre>
-            </v-card>
+            <h3>Raw Log Entry</h3>
+            <pre class="log-raw">{{ selectedLogDetails.raw }}</pre>
           </div>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
+
+    <!-- Browser Details Dialog -->
+    <v-dialog v-model="browserDetailsDialog" max-width="800">
+      <v-card>
+        <v-card-title class="headline primary white--text">
+          Browser Details
+          <v-spacer></v-spacer>
+          <v-btn icon @click="browserDetailsDialog = false">
+            <v-icon color="white">mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+        <v-card-text class="pt-4">
+          <v-row>
+            <v-col cols="12">
+              <v-card flat>
+                <v-card-title>
+                  <span v-if="selectedBrowserDetails">
+                    <img
+                      v-if="browserLogos[selectedBrowserDetails.browser]"
+                      :src="browserLogos[selectedBrowserDetails.browser]"
+                      height="24"
+                      width="24"
+                      class="mr-3"
+                    />
+                    {{ selectedBrowserDetails.browser }}
+                  </span>
+                </v-card-title>
+                <v-card-text>
+                  <div v-if="selectedBrowserDetails">
+                    <div class="d-flex mb-2">
+                      <div class="font-weight-bold mr-2">Sessions:</div>
+                      <div>{{ selectedBrowserDetails.hits }}</div>
+                    </div>
+                    <div class="d-flex mb-2">
+                      <div class="font-weight-bold mr-2">Percentage:</div>
+                      <div>{{ selectedBrowserDetails.percentage.toFixed(2) }}%</div>
+                    </div>
+                    <div class="mt-4">
+                      <div class="font-weight-bold mb-2">Sample User Agent Strings:</div>
+                      <div v-if="browserUserAgents && browserUserAgents.length > 0">
+                        <v-card outlined class="pa-2 mb-2" v-for="(ua, index) in browserUserAgents" :key="index">
+                          <pre class="user-agent-pre">{{ ua }}</pre>
+                        </v-card>
+                      </div>
+                      <div v-else class="grey--text text-center pa-4">
+                        No user agent data available
+                      </div>
+                    </div>
+                  </div>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
         </v-card-text>
       </v-card>
     </v-dialog>
   </v-app>
 </template>
 
-<style>
-@import url("https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900");
-@import url("https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css");
-
-html { overflow-y: auto; }
-
-.v-btn:hover::before {
-  opacity: 0.08;
+<style scoped>
+.drag-hover {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 #dropzone {
-  border: 2px dotted #aaa;
-  padding: 20px;
+  border: 4px dashed var(--v-primary-base);
   text-align: center;
-}
-
-#dropzone.drag-hover {
-  border-color: #4caf50;
-  background-color: #eee;
+  padding: 4em 1em;
+  transition: all 0.2s;
 }
 
 #files {
   display: none;
+}
+
+.success {
+  color: green;
+}
+.warning {
+  color: orange;
+}
+.error {
+  color: red;
+}
+
+.ip-address {
+  cursor: pointer;
+  color: var(--v-primary-base);
+}
+
+.log-raw, 
+.user-agent-pre {
+  white-space: pre-wrap;
+  word-break: break-all;
+  background-color: var(--v-background-base, #f5f5f5);
+  padding: 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.theme--dark .log-raw,
+.theme--dark .user-agent-pre {
+  background-color: #333;
+  color: #eee;
 }
 
 #tabs .v-tabs-bar {
@@ -1084,6 +1336,12 @@ export default {
     logDetailsDialog: false,
     selectedLogDetails: null,
     theme: localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
+    securityTab: null,
+    errorIPs: [],
+    leastUsedBrowsers: [],
+    browserDetailsDialog: false,
+    selectedBrowserDetails: null,
+    browserUserAgents: [],
   }),
   computed: {
     filteredLogDetails() {
@@ -1303,9 +1561,47 @@ export default {
       const countryCounter = {};
       const ipCounter = {};
       const ipData = {};
+      const browserData = {}; // Store browser data including sample user agents
       const dates = {};
       let totalTransfer = 0;
       const self = this; // Store reference to 'this'
+
+      // Define fields that may contain user agent strings
+      const userAgentFields = ['userAgent', 'userAgend', 'user_agent', 'ua'];
+      
+      // Function to extract user agent from an object
+      const extractUserAgent = (obj) => {
+        for (const field of userAgentFields) {
+          if (obj[field] && typeof obj[field] === 'string') {
+            return obj[field];
+          }
+        }
+        return null;
+      };
+      
+      // Browser name mapping for consistency
+      const normalizeBrowserName = (browser) => {
+        if (!browser) return '';
+        
+        // Standard naming
+        if (browser.includes('Chrome') && browser.includes('WebView')) {
+          return 'Chrome WebView';
+        } else if (browser === 'Chrome' || browser === 'Chromium') {
+          return 'Chrome';
+        } else if (browser === 'Firefox' || browser === 'Mozilla') {
+          return 'Firefox';
+        } else if (browser === 'Safari' || browser === 'Mobile Safari') {
+          return 'Safari';
+        } else if (browser.includes('Edge') || browser === 'Edg') {
+          return 'Edge';
+        } else if (browser.includes('IE') || browser.includes('Internet Explorer')) {
+          return 'IE';
+        } else if (browser.includes('Opera')) {
+          return 'Opera';
+        }
+        
+        return browser;
+      };
 
       let splitTime = "hour";
       if (logs.length > 0) {
@@ -1330,6 +1626,23 @@ export default {
           urlCounter[log.url] = urlCounter[log.url] + 1 || 1;
         }
         
+        // Capture user agent data for browser if available
+        if (log.browser) {
+          const normalizedBrowser = normalizeBrowserName(log.browser);
+          log.browser = normalizedBrowser; // Normalize for consistency
+          
+          const ua = extractUserAgent(log);
+          if (ua) {
+            if (!browserData[normalizedBrowser]) {
+              browserData[normalizedBrowser] = { userAgents: [] };
+            }
+            if (!browserData[normalizedBrowser].userAgents.includes(ua) && 
+                browserData[normalizedBrowser].userAgents.length < 5) {
+              browserData[normalizedBrowser].userAgents.push(ua);
+            }
+          }
+        }
+        
         // Track IP addresses and their request counts
         if (log.ipAddress) {
           ipCounter[log.ipAddress] = ipCounter[log.ipAddress] + 1 || 1;
@@ -1339,7 +1652,7 @@ export default {
             ipData[log.ipAddress] = {
               country: log.country || '',
               browser: '',
-              userAgent: log.userAgend || '',
+              userAgent: extractUserAgent(log) || '',
               network: self.getNetworkInfo(log.ipAddress) || ''
             };
           }
@@ -1372,47 +1685,62 @@ export default {
           transferCounter[time] + log.transfer || log.transfer || 0;
       });
 
-      sessions.forEach((log) => {
-        if (log.referrerDomain && log.referrerDomain !== "-") {
-          referrerCounter[log.referrerDomain] =
-            referrerCounter[log.referrerDomain] + 1 || 1;
+      sessions.forEach((session) => {
+        if (session.referrerDomain && session.referrerDomain !== "-") {
+          referrerCounter[session.referrerDomain] =
+            referrerCounter[session.referrerDomain] + 1 || 1;
         }
-        if (log.browser) {
-          browserCounter[log.browser] = browserCounter[log.browser] + 1 || 1;
+        if (session.browser) {
+          const normalizedBrowser = normalizeBrowserName(session.browser);
+          session.browser = normalizedBrowser; // Normalize for consistency
+          
+          browserCounter[normalizedBrowser] = browserCounter[normalizedBrowser] + 1 || 1;
+          
+          // Capture user agent data for browser if available 
+          const ua = extractUserAgent(session);
+          if (ua) {
+            if (!browserData[normalizedBrowser]) {
+              browserData[normalizedBrowser] = { userAgents: [] };
+            }
+            if (!browserData[normalizedBrowser].userAgents.includes(ua) && 
+                browserData[normalizedBrowser].userAgents.length < 5) {
+              browserData[normalizedBrowser].userAgents.push(ua);
+            }
+          }
           
           // Update browser info for this IP if available
-          if (log.ipAddress && ipData[log.ipAddress]) {
-            ipData[log.ipAddress].browser = log.browser;
+          if (session.ipAddress && ipData[session.ipAddress]) {
+            ipData[session.ipAddress].browser = session.browser;
           }
         }
-        if (log.country) {
-          countryCounter[log.country] = countryCounter[log.country] + 1 || 1;
+        if (session.country) {
+          countryCounter[session.country] = countryCounter[session.country] + 1 || 1;
           
           // Update country info for this IP if available
-          if (log.ipAddress && ipData[log.ipAddress]) {
-            ipData[log.ipAddress].country = log.country;
+          if (session.ipAddress && ipData[session.ipAddress]) {
+            ipData[session.ipAddress].country = session.country;
           }
         }
         
         let time;
         if (splitTime === "hour") {
           time =
-            log.date.toLocaleDateString() +
+            session.date.toLocaleDateString() +
             " " +
-            log.date.getHours().toString().padStart(2, "0") +
+            session.date.getHours().toString().padStart(2, "0") +
             ":00";
           dates[time] = new Date(
-            log.date.getFullYear(),
-            log.date.getMonth(),
-            log.date.getDate(),
-            log.date.getHours()
+            session.date.getFullYear(),
+            session.date.getMonth(),
+            session.date.getDate(),
+            session.date.getHours()
           );
         } else if (splitTime === "day") {
-          time = log.date.toLocaleDateString();
+          time = session.date.toLocaleDateString();
           dates[time] = new Date(
-            log.date.getFullYear(),
-            log.date.getMonth(),
-            log.date.getDate()
+            session.date.getFullYear(),
+            session.date.getMonth(),
+            session.date.getDate()
           );
         }
         sessionCounter[time] = sessionCounter[time] + 1 || 1;
@@ -1609,6 +1937,74 @@ export default {
       }
       mostIPs.sort((a, b) => b.hits - a.hits);
       this.mostIPs = mostIPs.slice(0, 10);
+
+      // Calculate top IPs with 4xx and 5xx errors
+      const errorIPCounter = {};
+      const errorIPData = {};
+      
+      logs.forEach(log => {
+        const statusCode = parseInt(log.statusCode);
+        // Check if this is a 4xx or 5xx error
+        if (statusCode >= 400 && log.ipAddress) {
+          // Count errors for this IP
+          errorIPCounter[log.ipAddress] = (errorIPCounter[log.ipAddress] || 0) + 1;
+          
+          // Store or update associated data
+          if (!errorIPData[log.ipAddress]) {
+            errorIPData[log.ipAddress] = {
+              country: log.country || '',
+              browser: '',
+              network: self.getNetworkInfo(log.ipAddress) || ''
+            };
+          }
+        }
+      });
+      
+      // Check sessions for browser info for IPs that had errors
+      sessions.forEach(session => {
+        if (session.ipAddress && errorIPData[session.ipAddress] && session.browser) {
+          errorIPData[session.ipAddress].browser = session.browser;
+        }
+        if (session.ipAddress && errorIPData[session.ipAddress] && session.country) {
+          errorIPData[session.ipAddress].country = session.country;
+        }
+      });
+      
+      // Create array of IPs with error counts
+      const errorIPs = [];
+      for (let ip in errorIPCounter) {
+        errorIPs.push({
+          ip: ip,
+          errorCount: errorIPCounter[ip],
+          country: errorIPData[ip] ? errorIPData[ip].country : '',
+          browser: errorIPData[ip] ? errorIPData[ip].browser : '',
+          network: errorIPData[ip] ? errorIPData[ip].network : self.getNetworkInfo(ip)
+        });
+      }
+      
+      // Sort by error count and take top 20
+      errorIPs.sort((a, b) => b.errorCount - a.errorCount);
+      this.errorIPs = errorIPs.slice(0, 20);
+      
+      // Calculate total sessions for percentage calculations
+      const totalSessions = sessions.length;
+      
+      // Add percentage data to mostBrowsers
+      const browsersWithPercentage = mostBrowsers.map(item => ({
+        ...item,
+        percentage: totalSessions > 0 ? (item.hits / totalSessions) * 100 : 0,
+        userAgents: browserData[item.browser]?.userAgents || []
+      }));
+      
+      // Set most used browsers (with percentage)
+      this.mostBrowsers = browsersWithPercentage.slice(0, 20);
+      
+      // Calculate least used browsers (with percentage)
+      const leastUsedBrowsers = [...browsersWithPercentage]
+        .filter(item => item.hits > 0) // Exclude browsers with 0 hits
+        .sort((a, b) => a.hits - b.hits); // Sort ascending by hit count
+        
+      this.leastUsedBrowsers = leastUsedBrowsers.slice(0, 20);
     },
     setStartDate: function() {
       if (this.startDatePicker && this.startTimePicker) {
@@ -1898,6 +2294,256 @@ export default {
           this.tab = currentTab;
         });
       });
+    },
+    showBrowserDetails: function(item) {
+      // Store browser details
+      this.selectedBrowserDetails = {...item};
+      
+      // If the browser item already has user agent data from our calculations
+      if (item.userAgents && item.userAgents.length > 0) {
+        this.browserUserAgents = [...item.userAgents];
+        this.browserDetailsDialog = true;
+        return;
+      }
+      
+      // Get sample user agent strings for this browser
+      this.browserUserAgents = [];
+      const userAgentFields = ['userAgent', 'userAgend', 'user_agent', 'ua'];
+      
+      // Function to find the first valid user agent field in a log object
+      const extractUserAgent = (obj) => {
+        for (const field of userAgentFields) {
+          if (obj[field] && typeof obj[field] === 'string') {
+            return obj[field];
+          }
+        }
+        return null;
+      };
+      
+      // List of browser names to check (add variations for each browser)
+      const browserNameVariants = this.getBrowserNameVariants(item.browser);
+      console.log("Looking for user agent data for browser variants:", browserNameVariants);
+      
+      // Find up to 5 unique user agent strings for this browser from logs
+      if (this.allLogs && this.allLogs.length > 0) {
+        const userAgents = new Set();
+        
+        for (const log of this.allLogs) {
+          if (log.browser && browserNameVariants.includes(log.browser)) {
+            const ua = extractUserAgent(log);
+            if (ua) {
+              userAgents.add(ua);
+              if (userAgents.size >= 5) break;
+            }
+          }
+        }
+        
+        this.browserUserAgents = Array.from(userAgents);
+      }
+      
+      // If no user agents found in logs, try sessions
+      if (this.browserUserAgents.length === 0 && this.allSessions && this.allSessions.length > 0) {
+        const userAgents = new Set();
+        
+        for (const session of this.allSessions) {
+          if (session.browser && browserNameVariants.includes(session.browser)) {
+            const ua = extractUserAgent(session);
+            if (ua) {
+              userAgents.add(ua);
+              if (userAgents.size >= 5) break;
+            }
+          }
+        }
+        
+        this.browserUserAgents = Array.from(userAgents);
+      }
+      
+      // If still no user agents, look for partial matches
+      if (this.browserUserAgents.length === 0) {
+        const simplifiedBrowserName = item.browser.toLowerCase().replace(/\s+/g, '');
+        const userAgents = new Set();
+        
+        // Check logs for partial matches
+        for (const log of this.allLogs) {
+          if (log.browser && log.browser.toLowerCase().replace(/\s+/g, '').includes(simplifiedBrowserName)) {
+            const ua = extractUserAgent(log);
+            if (ua) {
+              userAgents.add(ua);
+              if (userAgents.size >= 5) break;
+            }
+          }
+        }
+        
+        // Check sessions for partial matches
+        if (userAgents.size < 5) {
+          for (const session of this.allSessions) {
+            if (session.browser && 
+                session.browser.toLowerCase().replace(/\s+/g, '').includes(simplifiedBrowserName)) {
+              const ua = extractUserAgent(session);
+              if (ua && !userAgents.has(ua)) {
+                userAgents.add(ua);
+                if (userAgents.size >= 5) break;
+              }
+            }
+          }
+        }
+        
+        if (userAgents.size > 0) {
+          this.browserUserAgents = Array.from(userAgents);
+        }
+      }
+      
+      // If still no user agents found, look directly in raw user agent strings
+      if (this.browserUserAgents.length === 0) {
+        const userAgents = new Set();
+        const keywords = this.getBrowserKeywords(item.browser);
+        
+        // Check logs for keyword matches in user agent strings
+        for (const log of this.allLogs) {
+          const ua = extractUserAgent(log);
+          if (ua && this.containsAnyKeyword(ua.toLowerCase(), keywords)) {
+            userAgents.add(ua);
+            if (userAgents.size >= 5) break;
+          }
+        }
+        
+        // Check sessions for keyword matches in user agent strings
+        if (userAgents.size < 5) {
+          for (const session of this.allSessions) {
+            const ua = extractUserAgent(session);
+            if (ua && this.containsAnyKeyword(ua.toLowerCase(), keywords) && !userAgents.has(ua)) {
+              userAgents.add(ua);
+              if (userAgents.size >= 5) break;
+            }
+          }
+        }
+        
+        if (userAgents.size > 0) {
+          this.browserUserAgents = Array.from(userAgents);
+        }
+      }
+      
+      // Final fallback: if still no user agents, show any 5 user agents as examples
+      if (this.browserUserAgents.length === 0) {
+        const userAgents = new Set();
+        
+        // Just get any user agents at this point
+        for (const log of this.allLogs) {
+          const ua = extractUserAgent(log);
+          if (ua) {
+            userAgents.add(ua);
+            if (userAgents.size >= 5) break;
+          }
+        }
+        
+        if (userAgents.size < 5) {
+          for (const session of this.allSessions) {
+            const ua = extractUserAgent(session);
+            if (ua && !userAgents.has(ua)) {
+              userAgents.add(ua);
+              if (userAgents.size >= 5) break;
+            }
+          }
+        }
+        
+        if (userAgents.size > 0) {
+          this.browserUserAgents = Array.from(userAgents);
+          console.log("Using generic user agent examples as fallback");
+        }
+      }
+      
+      // Log browser identification data for debugging
+      console.log(`Looking for user agent data for: ${item.browser}`, {
+        foundUserAgents: this.browserUserAgents.length,
+        logCount: this.allLogs?.length || 0,
+        sessionCount: this.allSessions?.length || 0
+      });
+      
+      // Open the dialog
+      this.browserDetailsDialog = true;
+    },
+    
+    getBrowserNameVariants: function(browserName) {
+      // Create variations of browser names that might appear in logs
+      const variants = [browserName];
+      
+      // Add common variations
+      if (browserName.includes('Chrome')) {
+        variants.push('Chrome');
+        variants.push('Chromium');
+        if (browserName.includes('WebView')) {
+          variants.push('Android WebView');
+          variants.push('Android');
+          variants.push('Mobile');
+        }
+      } else if (browserName.includes('Firefox')) {
+        variants.push('Firefox');
+        variants.push('Mozilla');
+      } else if (browserName.includes('Safari')) {
+        variants.push('Safari');
+        variants.push('Mobile Safari');
+        variants.push('WebKit');
+      } else if (browserName.includes('Edge')) {
+        variants.push('Edge');
+        variants.push('Edg');
+        variants.push('EdgiOS');
+        variants.push('Edge Chromium');
+      } else if (browserName.includes('IE') || browserName.includes('Internet Explorer')) {
+        variants.push('IE');
+        variants.push('Internet Explorer');
+        variants.push('MSIE');
+      } else if (browserName.includes('Opera')) {
+        variants.push('Opera');
+        variants.push('OPR');
+      }
+      
+      return variants;
+    },
+    
+    getBrowserKeywords: function(browserName) {
+      // Create keywords to search for in user agent strings
+      const keywords = [];
+      
+      if (browserName.includes('Chrome')) {
+        keywords.push('chrome');
+        if (browserName.includes('WebView')) {
+          keywords.push('webview');
+          keywords.push('android');
+          keywords.push('mobile');
+          keywords.push('wv');
+        }
+      } else if (browserName.includes('Firefox')) {
+        keywords.push('firefox');
+        keywords.push('gecko');
+      } else if (browserName.includes('Safari')) {
+        keywords.push('safari');
+        keywords.push('webkit');
+        keywords.push('applewebkit');
+      } else if (browserName.includes('Edge')) {
+        keywords.push('edge');
+        keywords.push('edg/');
+        keywords.push('edgios');
+      } else if (browserName.includes('IE') || browserName.includes('Internet Explorer')) {
+        keywords.push('msie');
+        keywords.push('trident');
+      } else if (browserName.includes('Opera')) {
+        keywords.push('opera');
+        keywords.push('opr/');
+      } else {
+        // Add lowercase version of browser name without spaces
+        keywords.push(browserName.toLowerCase().replace(/\s+/g, ''));
+      }
+      
+      return keywords;
+    },
+    
+    containsAnyKeyword: function(text, keywords) {
+      for (const keyword of keywords) {
+        if (text.includes(keyword)) {
+          return true;
+        }
+      }
+      return false;
     },
   },
 };
