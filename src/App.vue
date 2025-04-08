@@ -270,18 +270,16 @@
                   id="tabs"
                 >
                   <v-tab>
-                    <div>Top IPs with Errors</div>
+                    <div class="tab-label">Top IPs with Errors</div>
                   </v-tab>
                   <v-tab>
-                    <v-icon left>mdi-browser-outline</v-icon>
-                    <div>Least Used Browsers</div>
+                    <div class="tab-label">Least Used Browsers</div>
                   </v-tab>
                   <v-tab>
-                    <v-icon left>mdi-browser</v-icon>
-                    <div>Most Used Browsers</div>
+                    <div class="tab-label">Most Used Browsers</div>
                   </v-tab>
                   <v-tab>
-                    <div>Largest Transfers</div>
+                    <div class="tab-label">Largest Transfers</div>
                   </v-tab>
                   <v-tabs-slider color="primary"></v-tabs-slider>
                 </v-tabs>
@@ -491,23 +489,22 @@
                 v-model="tab"
                 background-color="transparent"
                 grow
-                id="tabs"
               >
-                <v-tab>
-                  <v-icon class="mb-2">mdi-chart-timeline</v-icon>
-                  <div>Sessions</div>
+                <v-tab class="d-flex align-center tab-with-text">
+                  <v-icon left>mdi-chart-timeline</v-icon>
+                  Sessions
                 </v-tab>
-                <v-tab>
-                  <v-icon class="mb-2">mdi-earth</v-icon>
-                  <div>Requests</div>
+                <v-tab class="d-flex align-center tab-with-text">
+                  <v-icon left>mdi-earth</v-icon>
+                  Requests
                 </v-tab>
-                <v-tab>
-                  <v-icon class="mb-2">mdi-format-list-bulleted</v-icon>
-                  <div>Traffic</div>
+                <v-tab class="d-flex align-center tab-with-text">
+                  <v-icon left>mdi-format-list-bulleted</v-icon>
+                  Traffic
                 </v-tab>
-                <v-tab>
-                  <v-icon class="mb-2">mdi-shield-account</v-icon>
-                  <div>Users</div>
+                <v-tab class="d-flex align-center tab-with-text">
+                  <v-icon left>mdi-shield-account</v-icon>
+                  Users
                 </v-tab>
                 <v-tabs-slider color="primary"></v-tabs-slider>
               </v-tabs>
@@ -1444,6 +1441,132 @@ pre {
 /* Remove existing styles that might be conflicting */
 #tabs .v-tab {
   margin-bottom: 0 !important;
+}
+
+.summary-tab {
+  height: 48px !important;
+  padding: 0 16px !important;
+}
+
+.tab-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.tab-label {
+  margin-top: 8px;
+  margin-bottom: 8px; /* Add bottom margin for spacing from the slider line */
+  font-size: 14px;
+  font-weight: 500;
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Add specific CSS for the security panel tabs */
+#tabs .v-tab {
+  padding-bottom: 16px !important; /* Add padding at the bottom to push content away from the slider */
+}
+
+/* Fix the summary panel tabs - ensure text is visible */
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.tab-content .v-icon {
+  margin-bottom: 0;
+}
+
+.tab-content .tab-label {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  color: inherit;
+  font-size: 14px;
+  text-transform: none;
+  line-height: 1.2;
+}
+
+#tabs .v-tab .tab-label {
+  display: block !important;
+  visibility: visible !important;
+  min-height: 20px;
+  line-height: 20px;
+}
+
+/* Make sure text color is visible */
+.theme--dark #tabs .v-tab .tab-label {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.theme--light #tabs .v-tab .tab-label {
+  color: rgba(0, 0, 0, 0.9);
+}
+
+/* Increase summary card bottom padding */
+.summary-card-title {
+  margin-bottom: 30px;
+}
+
+/* Move content away from tabs to prevent overlap */
+.v-tabs-items {
+  margin-top: 16px;
+}
+
+/* Ensure tabs have enough space */
+#tabs {
+  min-height: 48px;
+}
+
+/* Add much more space between tabs and content */
+.v-tabs-items {
+  margin-top: 40px !important; /* Increase this value significantly */
+  padding-top: 20px;
+  position: relative;
+}
+
+/* Add extra padding to the tab-item content */
+.v-tab-item .v-card-text {
+  padding-top: 20px;
+}
+
+/* Ensure tab bar has enough vertical space and fixed position */
+#tabs .v-tabs-bar {
+  height: auto !important;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.theme--dark #tabs .v-tabs-bar {
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.tab-with-text {
+  font-size: 14px !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  font-weight: 500 !important;
+  min-height: 48px !important;
+  justify-content: center !important;
+}
+
+.v-tabs-items {
+  margin-top: 48px !important;
+  padding-top: 24px !important;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.theme--light .v-tabs-items {
+  border-top: 1px solid rgba(0,0,0,0.1);
 }
 </style>
 <script>
