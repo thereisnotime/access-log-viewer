@@ -59,7 +59,7 @@
         </v-row>
 
         <!-- Time Range Filter -->
-        <v-row v-if="logs.length > 0">
+        <v-row v-if="allLogs && allLogs.length > 0">
           <v-col cols="12">
             <v-card>
               <v-card-title>
@@ -197,16 +197,34 @@
           </v-col>
         </v-row>
 
-        <v-row v-if="logs.length > 0">
+        <v-row v-if="allLogs && allLogs.length > 0">
           <v-col cols="12">
             <v-alert
-              v-if="isFiltered"
+              v-if="isFiltered && logs.length > 0"
               type="info"
               dense
               outlined
             >
               Showing filtered data from {{ startDateFormatted || 'earliest record' }} to {{ endDateFormatted || 'latest record' }}. 
-              <v-btn x-small text color="primary" @click="resetTimeFilter">Reset Filter</v-btn>
+              <v-btn small color="primary" @click="resetTimeFilter" class="ml-2">Reset Filter</v-btn>
+            </v-alert>
+            <v-alert
+              v-if="isFiltered && logs.length === 0"
+              type="warning"
+              dense
+              outlined
+            >
+              No data found in the selected time range. Please adjust your filter or 
+              <v-btn small color="primary" @click="resetTimeFilter" class="ml-2">Reset Filter</v-btn>
+            </v-alert>
+            <v-alert
+              v-if="!isFiltered && allLogs && allLogs.length > 0"
+              type="success"
+              dense
+              outlined
+              class="mt-2"
+            >
+              Showing all {{ allLogs.length }} log entries.
             </v-alert>
           </v-col>
         </v-row>
@@ -235,8 +253,8 @@
               </v-tabs>
               <v-tabs-items v-model="tab">
                 <v-tab-item :transition="false">
-                  <v-card flat v-if="tab === 0 && logs.length > 0">
-                    <v-card-text>
+                  <v-card flat v-if="tab === 0">
+                    <v-card-text v-if="logs.length > 0">
                       <GChart
                         type="LineChart"
                         :data="chartDataSessions"
@@ -245,6 +263,18 @@
                           chartArea: { width: '90%', height: '80%' },
                           colors: $vuetify.theme.dark ? ['#09ade8'] : ['#2196f3'],
                           backgroundColor: 'transparent',
+                          pointSize: 6,
+                          pointShape: 'circle',
+                          lineWidth: 3,
+                          curveType: 'function',
+                          interpolateNulls: true,
+                          tooltip: { isHtml: true },
+                          explorer: {
+                            actions: ['dragToZoom', 'rightClickToReset'],
+                            axis: 'horizontal',
+                            keepInBounds: true,
+                            maxZoomIn: 0.1
+                          },
                           hAxis: {
                               gridlines: {
                                   color: $vuetify.theme.dark ? '#444' : '#ccc'
@@ -255,7 +285,8 @@
                               baselineColor: $vuetify.theme.dark ?'#444' : '#ccc',
                               textStyle: {
                                 color: $vuetify.theme.dark ? '#aaa' : '#444'
-                              }
+                              },
+                              format: 'MM/dd/yy HH:mm'
                           },
                           vAxis: {
                              gridlines: {
@@ -267,16 +298,21 @@
                               baselineColor: $vuetify.theme.dark ?'#444' : '#ccc',
                               textStyle: {
                                 color: $vuetify.theme.dark ? '#aaa' : '#444'
-                              }
+                              },
+                              minValue: 0
                           },
                         }"
                       />
                     </v-card-text>
+                    <v-card-text v-else class="text-center pa-5">
+                      <v-icon large color="grey">mdi-chart-line</v-icon>
+                      <div class="grey--text mt-2">No session data available for the selected time range</div>
+                    </v-card-text>
                   </v-card>
                 </v-tab-item>
                 <v-tab-item :transition="false">
-                  <v-card flat v-if="tab === 1 && logs.length > 0">
-                    <v-card-text>
+                  <v-card flat v-if="tab === 1">
+                    <v-card-text v-if="logs.length > 0">
                       <GChart
                         type="LineChart"
                         :data="chartDataRequests"
@@ -285,6 +321,18 @@
                           chartArea: { width: '90%', height: '80%' },
                           colors: $vuetify.theme.dark ? ['#09ade8'] : ['#2196f3'],
                           backgroundColor: 'transparent',
+                          pointSize: 6,
+                          pointShape: 'circle',
+                          lineWidth: 3,
+                          curveType: 'function',
+                          interpolateNulls: true,
+                          tooltip: { isHtml: true },
+                          explorer: {
+                            actions: ['dragToZoom', 'rightClickToReset'],
+                            axis: 'horizontal',
+                            keepInBounds: true,
+                            maxZoomIn: 0.1
+                          },
                           hAxis: {
                               gridlines: {
                                   color: $vuetify.theme.dark ? '#444' : '#ccc'
@@ -295,7 +343,8 @@
                               baselineColor: $vuetify.theme.dark ?'#444' : '#ccc',
                               textStyle: {
                                 color: $vuetify.theme.dark ? '#aaa' : '#444'
-                              }
+                              },
+                              format: 'MM/dd/yy HH:mm'
                           },
                           vAxis: {
                              gridlines: {
@@ -307,16 +356,21 @@
                               baselineColor: $vuetify.theme.dark ?'#444' : '#ccc',
                               textStyle: {
                                 color: $vuetify.theme.dark ? '#aaa' : '#444'
-                              }
+                              },
+                              minValue: 0
                           }
                         }"
                       />
                     </v-card-text>
+                    <v-card-text v-else class="text-center pa-5">
+                      <v-icon large color="grey">mdi-chart-timeline</v-icon>
+                      <div class="grey--text mt-2">No request data available for the selected time range</div>
+                    </v-card-text>
                   </v-card>
                 </v-tab-item>
                 <v-tab-item :transition="false">
-                  <v-card flat v-if="tab === 2 && logs.length > 0">
-                    <v-card-text>
+                  <v-card flat v-if="tab === 2">
+                    <v-card-text v-if="logs.length > 0">
                       <GChart
                         type="LineChart"
                         :data="chartDataTransfer"
@@ -325,6 +379,18 @@
                           chartArea: { width: '90%', height: '80%' },
                           colors: $vuetify.theme.dark ? ['#09ade8'] : ['#2196f3'],
                           backgroundColor: 'transparent',
+                          pointSize: 6,
+                          pointShape: 'circle',
+                          lineWidth: 3,
+                          curveType: 'function',
+                          interpolateNulls: true,
+                          tooltip: { isHtml: true },
+                          explorer: {
+                            actions: ['dragToZoom', 'rightClickToReset'],
+                            axis: 'horizontal',
+                            keepInBounds: true,
+                            maxZoomIn: 0.1
+                          },
                           hAxis: {
                               gridlines: {
                                   color: $vuetify.theme.dark ? '#444' : '#ccc'
@@ -335,7 +401,8 @@
                               baselineColor: $vuetify.theme.dark ?'#444' : '#ccc',
                               textStyle: {
                                 color: $vuetify.theme.dark ? '#aaa' : '#444'
-                              }
+                              },
+                              format: 'MM/dd/yy HH:mm'
                           },
                           vAxis: {
                              gridlines: {
@@ -347,10 +414,15 @@
                               baselineColor: $vuetify.theme.dark ?'#444' : '#ccc',
                               textStyle: {
                                 color: $vuetify.theme.dark ? '#aaa' : '#444'
-                              }
+                              },
+                              minValue: 0
                           }
                         }"
                       />
+                    </v-card-text>
+                    <v-card-text v-else class="text-center pa-5">
+                      <v-icon large color="grey">mdi-swap-vertical</v-icon>
+                      <div class="grey--text mt-2">No transfer data available for the selected time range</div>
                     </v-card-text>
                   </v-card>
                 </v-tab-item>
@@ -636,7 +708,7 @@
           <v-col cols="12">
             <v-card>
               <v-card-title> Logs </v-card-title>
-              <v-card-text>
+              <v-card-text v-if="logs.length > 0">
                 <v-text-field
                   v-model="search"
                   label="Search"
@@ -670,6 +742,11 @@
                     }}
                   </template>
                 </v-data-table>
+              </v-card-text>
+              <v-card-text v-else class="text-center pa-5">
+                <v-icon large color="grey">mdi-table-off</v-icon>
+                <div class="grey--text mt-2">No log entries found for the selected time range</div>
+                <v-btn small color="primary" @click="resetTimeFilter" class="mt-4">Reset Filter</v-btn>
               </v-card-text>
             </v-card>
           </v-col>
@@ -1119,10 +1196,10 @@ export default {
             log.date.getDate()
           );
         }
-        dates[time] = log.date;
+        
         requestCounter[time] = requestCounter[time] + 1 || 1;
         transferCounter[time] =
-          transferCounter[time] + log.transfer || log.transfer;
+          transferCounter[time] + log.transfer || log.transfer || 0;
       });
 
       sessions.forEach((log) => {
@@ -1177,9 +1254,25 @@ export default {
       for (let date in sessionCounter) {
         chartDataSessions.push([dates[date], sessionCounter[date]]);
       }
+      
+      // Sort by date for proper line display
+      chartDataSessions.sort((a, b) => {
+        if (!a[0] || !b[0]) return 0;
+        return new Date(a[0]) - new Date(b[0]);
+      });
+      
       if (chartDataSessions.length === 0) {
         chartDataSessions.push(["2022", 0]);
+      } else if (chartDataSessions.length === 1) {
+        // If only one data point, add a duplicate point with slight offset
+        const dataPoint = [...chartDataSessions[0]];
+        if (dataPoint[0] instanceof Date) {
+          const date = new Date(dataPoint[0].getTime());
+          date.setMinutes(date.getMinutes() + 5);
+          chartDataSessions.push([date, dataPoint[1]]);
+        }
       }
+      
       chartDataSessions.push(["Time", "Sessions"]);
       chartDataSessions.reverse();
       this.chartDataSessions = Object.freeze(chartDataSessions);
@@ -1188,9 +1281,25 @@ export default {
       for (let date in requestCounter) {
         chartDataRequests.push([dates[date], requestCounter[date]]);
       }
+      
+      // Sort by date for proper line display
+      chartDataRequests.sort((a, b) => {
+        if (!a[0] || !b[0]) return 0;
+        return new Date(a[0]) - new Date(b[0]);
+      });
+      
       if (chartDataRequests.length === 0) {
         chartDataRequests.push(["2022", 0]);
+      } else if (chartDataRequests.length === 1) {
+        // If only one data point, add a duplicate point with slight offset
+        const dataPoint = [...chartDataRequests[0]];
+        if (dataPoint[0] instanceof Date) {
+          const date = new Date(dataPoint[0].getTime());
+          date.setMinutes(date.getMinutes() + 5);
+          chartDataRequests.push([date, dataPoint[1]]);
+        }
       }
+      
       chartDataRequests.push(["Time", "Requests"]);
       chartDataRequests.reverse();
       this.chartDataRequests = Object.freeze(chartDataRequests);
@@ -1202,9 +1311,25 @@ export default {
           { v: transferCounter[date], f: prettyBytes(transferCounter[date]) },
         ]);
       }
+      
+      // Sort by date for proper line display
+      chartDataTransfer.sort((a, b) => {
+        if (!a[0] || !b[0]) return 0;
+        return new Date(a[0]) - new Date(b[0]);
+      });
+      
       if (chartDataTransfer.length === 0) {
         chartDataTransfer.push(["2022", 0]);
+      } else if (chartDataTransfer.length === 1) {
+        // If only one data point, add a duplicate point with slight offset
+        const dataPoint = [...chartDataTransfer[0]];
+        if (dataPoint[0] instanceof Date) {
+          const date = new Date(dataPoint[0].getTime());
+          date.setMinutes(date.getMinutes() + 5);
+          chartDataTransfer.push([date, dataPoint[1]]);
+        }
       }
+      
       chartDataTransfer.push(["Time", "Bytes"]);
       chartDataTransfer.reverse();
       this.chartDataTransfer = Object.freeze(chartDataTransfer);
@@ -1350,11 +1475,8 @@ export default {
       this.isFiltered = false;
       this.activePreset = ''; // Clear active preset
       
-      if (this.allLogs.length > 0) {
-        // Restore original data
-        this.logs = Object.freeze(this.allLogs);
-        
-        // Reset date/time UI components but keep original range values
+      if (this.allLogs && this.allLogs.length > 0 && this.allSessions && this.allSessions.length > 0) {
+        // Sort logs for getting date ranges
         const sortedLogs = [...this.allLogs].sort((a, b) => a.date - b.date);
         if (sortedLogs.length > 0) {
           const earliest = new Date(sortedLogs[0].date);
@@ -1377,8 +1499,24 @@ export default {
           this.endDateFormatted = this.formatDateTime(latest);
         }
         
-        // Recalculate all visualizations with the full dataset
+        // Use the reset approach to recalculate everything from scratch
+        this.logs = Object.freeze([...this.allLogs]);
+        
+        // Force recalculation of all values with full dataset
         this.calculateValues(this.allLogs, this.allSessions);
+        
+        // Trigger update on dashboard components
+        this.$nextTick(() => {
+          // Ensure charts refresh properly
+          if (this.tab === 0) {
+            this.tab = 1;
+            this.$nextTick(() => { this.tab = 0; });
+          } else {
+            const currentTab = this.tab;
+            this.tab = (this.tab + 1) % 3;
+            this.$nextTick(() => { this.tab = currentTab; });
+          }
+        });
       }
     },
     
@@ -1486,7 +1624,17 @@ export default {
       this.endDateFormatted = this.formatDateTime(end);
       
       // Apply the filter
-      this.applyTimeFilter();
+      if (this.allLogs && this.allLogs.length > 0) {
+        let filteredLogs = [...this.allLogs];
+        let filteredSessions = [...this.allSessions];
+        
+        filteredLogs = filteredLogs.filter(log => log.date >= start && log.date <= end);
+        filteredSessions = filteredSessions.filter(session => session.date >= start && session.date <= end);
+        
+        // Apply the filtered data
+        this.calculateValues(filteredLogs, filteredSessions);
+        this.isFiltered = true;
+      }
     },
   },
 };
