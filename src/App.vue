@@ -420,7 +420,7 @@
                       <v-card-text v-if="largestTransfers && largestTransfers.length > 0">
                         <v-data-table
                           :headers="[
-                            { text: 'URL', value: 'url' },
+                            { text: 'URL', value: 'url', width: '25%' },
                             { text: 'IP Address', value: 'ipAddress' },
                             { text: 'Transfer Size', value: 'transfer' },
                             { text: 'Method', value: 'method' },
@@ -435,17 +435,27 @@
                             'show-first-last-page': true
                           }"
                           class="elevation-1"
+                          @click:row="showLogDetails"
                         >
+                          <template v-slot:item.url="{ item }">
+                            <span :title="item.url">{{
+                              item.url.substring(0, 40) +
+                              (item.url.length > 40 ? "..." : "")
+                            }}</span>
+                          </template>
                           <template v-slot:item.ipAddress="{ item }">
                             <ip-address :ip="item.ipAddress" @find-in-logs="setSearchFilter" />
+                          </template>
+                          <template v-slot:item.transfer="{ item }">
+                            {{ prettyBytes(item.transfer) }}
+                          </template>
+                          <template v-slot:item.method="{ item }">
+                            {{ item.method }}
                           </template>
                           <template v-slot:item.statusCode="{ item }">
                             <span :class="getStatusCodeClass(item.statusCode)">
                               {{ item.statusCode }}
                             </span>
-                          </template>
-                          <template v-slot:item.transfer="{ item }">
-                            {{ prettyBytes(item.transfer) }}
                           </template>
                           <template v-slot:item.date="{ item }">
                             {{ formatDate(new Date(item.date)) }}
@@ -1154,6 +1164,17 @@
           <div class="mt-4" v-if="selectedLogDetails && selectedLogDetails.raw">
             <h3>Raw Log Entry</h3>
             <pre class="log-raw">{{ selectedLogDetails.raw }}</pre>
+          </div>
+          
+          <div class="mt-4 d-flex justify-end">
+            <v-btn 
+              v-if="selectedLogDetails && selectedLogDetails.url" 
+              color="primary" 
+              @click="findRelatedLogs(selectedLogDetails.url)"
+            >
+              <v-icon left>mdi-magnify</v-icon>
+              Find Related Logs
+            </v-btn>
           </div>
         </v-card-text>
       </v-card>
@@ -2884,7 +2905,42 @@ export default {
         console.error("Error formatting date with timezone:", e);
         return date.toLocaleString();
       }
-    }
+    },
+    findRelatedLogs: function(url) {
+      // Close the current dialog
+      this.logDetailsDialog = false;
+      
+      // Extract the path part of the URL to make search more effective
+      let searchTerm = url;
+      try {
+        // Remove query parameters and hash
+        searchTerm = url.split('?')[0].split('#')[0];
+        
+        // If it's a full URL, extract just the path
+        if (searchTerm.startsWith('http')) {
+          const urlParts = new URL(searchTerm);
+          searchTerm = urlParts.pathname;
+        }
+        
+        // If path is too long, use just the filename part
+        if (searchTerm.length > 20) {
+          searchTerm = searchTerm.split('/').pop();
+        }
+      } catch (e) {
+        console.error("Error processing URL for search:", e);
+      }
+      
+      // Set the search filter
+      this.search = searchTerm;
+      
+      // Scroll to the logs section
+      this.$nextTick(() => {
+        const logsElement = document.getElementById('logs-section');
+        if (logsElement) {
+          logsElement.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    },
   },
   mounted() {
     // Add scroll listener for scroll-to-top button
